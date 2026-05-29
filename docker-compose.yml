@@ -1,14 +1,13 @@
-version: "3.9"
 services:
   db:
     image: mysql:8.0
     container_name: badminton_mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-badminton_shop}
-      MYSQL_USER: ${MYSQL_USER:-app}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-app123}
-    ports: ["3307:3306"]
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports: ["3308:3306"]
     volumes:
       - db_data:/var/lib/mysql
       - ./database/init:/docker-entrypoint-initdb.d
@@ -19,14 +18,14 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
+    build: ./api/MyAPI/MyAPI
     container_name: badminton_backend
-    env_file:
-      - ./backend/.env
+    environment:
+      ASPNETCORE_URLS: http://+:5211
+      ASPNETCORE_ENVIRONMENT: Development
     depends_on:
       - db
-    ports: ["8000:8000"]
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports: ["5211:5211"]
 
   frontend:
     build: ./frontend
@@ -35,15 +34,15 @@ services:
       - ./frontend/.env
     depends_on:
       - backend
-    ports: ["5173:5173"]
-    command: npm run dev -- --host
+    ports: ["3000:3000"]
+    command: npm run dev -- --hostname 0.0.0.0 --port 3000
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     environment:
       PMA_HOST: db
-      PMA_USER: ${MYSQL_USER:-app}
-      PMA_PASSWORD: ${MYSQL_PASSWORD:-app123}
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
     ports: ["8080:80"]
     depends_on:
       - db

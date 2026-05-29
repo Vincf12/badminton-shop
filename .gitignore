@@ -12,3 +12,12 @@ env/
 # Node
 node_modules/
 .next/
+
+# .NET / Visual Studio outputs
+.vs/
+bin/
+obj/
+
+# local environment files
+.env*
+!.env.example
