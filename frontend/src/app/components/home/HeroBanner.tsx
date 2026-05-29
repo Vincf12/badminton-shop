@@ -18,7 +18,7 @@ export default function HeroBanner() {
 
       {/* Nội dung banner */}
       <div className="absolute inset-0 flex items-center justify-start">
-        <div className="max-w-7xl mx-80 px-6 text-left">
+        <div className="container max-w-7xl mx-auto px-6 text-left">
           <h1 className="text-white text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
             Đập mạnh <span className="text-emerald-300">Chiến thắng nhanh</span>
           </h1>

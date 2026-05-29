@@ -5,6 +5,7 @@ import MainLayout from "@/app/components/layout/MainLayout";
 import ProductGrid from "@/app/components/home/ProductGrid";
 import FilterGroup from "@/app/components/product/FilterGroup"; // Đã sửa tên import cho đúng chuẩn
 import { Search, SlidersHorizontal } from "lucide-react";
+import { addUniqueItem } from "framer-motion";
 
 export default function ShopPage() {
   const products = [
@@ -67,6 +68,8 @@ export default function ShopPage() {
 
   const brands = ["APAVI", "X", "ASHAWAY", "ASICS", "KADA SX", "DUNLOP", "FECOLOS", "FF"];
 
+  const sizeracket = ["665mm", "670mm","675mm"];
+
   const sortOptions = [
     "Khuyến mãi tốt",
     "Sản phẩm mới nhất",
@@ -92,7 +95,7 @@ export default function ShopPage() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
           
           {/* ASIDE: SIDEBAR BỘ LỌC */}
-          <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+          <aside className="space-y-4 lg:top-28 lg:self-start">
             <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Bộ lọc</h2>
@@ -139,13 +142,15 @@ export default function ShopPage() {
 
                 {/* 2. Chiều dài vợt */}
                 <FilterGroup title="Chiều dài vợt">
-                  <label className="flex items-center gap-2 cursor-pointer hover:text-emerald-600 transition-colors">
-                    <input 
-                      type="checkbox" 
-                      className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" 
-                    />
-                    <span>675mm</span>
-                  </label>
+                  {sizeracket.map((item) => (
+                    <label key={item} className="flex items-center gap-2 cursor-pointer hover:text-emerald-600 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        className="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer" 
+                      />
+                      <span>{item}</span>
+                    </label>
+                  ))}
                 </FilterGroup>
 
                 {/* 3. Màu sắc */}

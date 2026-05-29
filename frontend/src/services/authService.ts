@@ -1,10 +1,11 @@
-const API_BASE_URL = 'http://localhost:8000/api/auth';
+const API_BASE_URL = 'http://localhost:5211/api/Auth';
 
 export interface RegisterData {
-  full_name: string;
+  username: string;
+  fullName: string;
   email: string;
-  phone?: string;
   password: string;
+  phone?: string;
 }
 
 export interface LoginData {
@@ -14,7 +15,7 @@ export interface LoginData {
 
 export interface User {
   user_id: number;
-  full_name: string;
+  fullName: string;
   email: string;
   phone?: string;
   address?: string;
@@ -39,8 +40,26 @@ class AuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Đăng ký thất bại');
+        let errMsg = 'Đăng ký thất bại';
+        try {
+          const ct = response.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const errorData = await response.json();
+            // Handle ASP.NET Core validation errors shape: { errors: { Field: ["..."] } }
+            if (errorData?.errors && typeof errorData.errors === 'object') {
+              const msgs = Object.values(errorData.errors).flat().filter(Boolean);
+              errMsg = msgs.join('; ') || errMsg;
+            } else {
+              errMsg = errorData?.detail || errorData?.message || JSON.stringify(errorData) || errMsg;
+            }
+          } else {
+            const text = await response.text();
+            if (text) errMsg = text;
+          }
+        } catch (e) {
+          // ignore parse errors and keep default message
+        }
+        throw new Error(errMsg);
       }
 
       return await response.json();
@@ -52,21 +71,41 @@ class AuthService {
 
   async login(data: LoginData): Promise<AuthResponse> {
     try {
-      const formData = new FormData();
-      formData.append('username', data.email);
-      formData.append('password', data.password);
-
+      // Backend expects JSON { email, password } and returns { message, token, user }
       const response = await fetch(`${API_BASE_URL}/login`, {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: data.email, password: data.password }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Đăng nhập thất bại');
+        let errMsg = 'Đăng nhập thất bại';
+        try {
+          const ct = response.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const errorData = await response.json();
+            if (errorData?.errors && typeof errorData.errors === 'object') {
+              const msgs = Object.values(errorData.errors).flat().filter(Boolean);
+              errMsg = msgs.join('; ') || errMsg;
+            } else {
+              errMsg = errorData?.detail || errorData?.message || JSON.stringify(errorData) || errMsg;
+            }
+          } else {
+            const text = await response.text();
+            if (text) errMsg = text;
+          }
+        } catch (e) {
+          // ignore
+        }
+        throw new Error(errMsg);
       }
 
-      return await response.json();
+      // Normalize to { access_token, token_type } for frontend compatibility
+      const json = await response.json();
+      // backend returns token in `token` field
+      return { access_token: json.token, token_type: 'Bearer' } as AuthResponse;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -75,7 +114,7 @@ class AuthService {
 
   async getCurrentUser(token: string): Promise<User> {
     try {
-      const response = await fetch(`${API_BASE_URL}/me`, {
+      const response = await fetch(`${API_BASE_URL}/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },

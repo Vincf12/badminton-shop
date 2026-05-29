@@ -5,13 +5,18 @@ import MainLayout from "@/app/components/layout/MainLayout";
 import Image from "next/image";
 import { ShoppingCart, Heart, Star, Minus, Plus } from "lucide-react";
 
+// 1. Cập nhật lại kiểu dữ liệu của params thành một Promise
 interface ProductPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ProductPage({ params }: ProductPageProps) {
+  // 2. Sử dụng React.use() để giải nén params một cách đồng bộ trong Client Component
+  const unwrappedParams = React.use(params);
+  const productId = unwrappedParams.id;
+
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -40,7 +45,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   // Mock data - sau này sẽ fetch từ API dựa vào params.id
   const product = {
-    id: params.id,
+    id: productId,
     name: "Vợt Cầu Lông Yonex Astrox 99",
     price: 4500000,
     originalPrice: 5500000,

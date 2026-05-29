@@ -9,7 +9,8 @@ import { authService, RegisterData } from "@/services/authService";
 export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);
   const [formData, setFormData] = useState<RegisterData>({
-    full_name: "",
+    fullName: "",
+    username: "",
     email: "",
     phone: "",
     password: "",
@@ -81,13 +82,30 @@ export default function RegisterPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700">
+                  Nhập Username
+                </label>
+                <div className="relative mt-1 mb-5">
+                  <input
+                    type="text"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    placeholder="Nhập username"
+                    className="w-full border rounded-lg px-5 py-2 focus:ring-emerald-500 focus:border-emerald-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
                   Nhập Họ và Tên
                 </label>
                 <div className="relative mt-1 mb-5">
                   <input
                     type="text"
-                    name="full_name"
-                    value={formData.full_name}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleInputChange}
                     placeholder="Nhập họ và tên"
                     className="w-full border rounded-lg px-5 py-2 focus:ring-emerald-500 focus:border-emerald-500"

@@ -39,7 +39,7 @@ export default function CartPage() {
 
   return (
     <MainLayout>
-      <div className="cart-page">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">Giỏ hàng</h1>
           <p className="text-gray-600">

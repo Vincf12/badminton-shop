@@ -41,10 +41,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   }, [showUserMenu]);
 
   const navItems = [
-    { to: "/", label: "Trang chủ" },
-    { to: "/shop", label: "Sản phẩm" },
-    { to: "/about", label: "Về chúng tôi" },
-    { to: "/contact", label: "Liên hệ" },
+    { to: "/", label: "Trang Chủ" },
+    { to: "/shop", label: "Sản Phẩm" },
+    { to: "/about", label: "Về Chúng Tôi" },
+    { to: "/contact", label: "Liên Hệ" },
   ];
 
   // ✅ Kiểm tra nếu đang ở trang chủ
@@ -65,7 +65,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
+            <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
               <div className="hidden sm:block">
                 <span className="text-4xl font-bold bg-linear-to-r from-emerald-500 to-emerald-700 bg-clip-text text-transparent">
                   FlyShot
@@ -75,7 +75,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-8 flex-1 justify-center">
               {navItems.map((item) => (
                 <Link
                   key={item.to}
@@ -84,10 +84,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     pathname === item.to
                       ? "text-emerald-400"
                       : "text-white hover:text-emerald-400"
-                  } after:absolute after:-bottom-1 after:left-0 after:h-0.5 after:bg-emerald-400 after:transition-all after:duration-200 ${
-                    pathname === item.to
-                      ? "after:w-full"
-                      : "after:w-0 hover:after:w-full"
                   }`}
                 >
                   {item.label}
@@ -252,7 +248,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-2 pt-24">
+      <main className={`flex-1 max-w-7xl mx-auto w-full px-6 py-2 ${isHome ? 'pt-6' : 'pt-20'}`}>
         {children}
       </main>
 
@@ -333,13 +329,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <div className="border-t border-white/5 bg-[#080d18]">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
           <div>
-            © {new Date().getFullYear()} FlyShot. All rights reserved. Thiết kế bởi FlyShot Team.
-          </div>
-          {/* Giả lập các icon thanh toán giúp tăng uy tín cho web */}
-          <div className="flex space-x-3 text-lg opacity-40 grayscale hover:grayscale-0 transition-all">
-            <span>💳</span> {/* Visa */}
-            <span>💵</span> {/* COD */}
-            <span>🏦</span> {/* Chuyển khoản */}
+            © {new Date().getFullYear()} FlyShot. All rights reserved. Thiết kế bởi Phùng Đăng Khoa.
           </div>
         </div>
       </div>
