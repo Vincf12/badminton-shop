@@ -35,10 +35,10 @@ namespace MyAPI.Controllers
 
             var user = new User
             {
-                UserName = dto.Username, 
                 Email = dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
-                FullName = dto.FullName 
+                FullName = dto.FullName,
+                Phone = dto.Phone
             };
 
             _context.Users.Add(user);

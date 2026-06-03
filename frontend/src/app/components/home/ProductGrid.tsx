@@ -1,16 +1,10 @@
 "use client";
 
 import ProductCard from "./ProductCard";
-
-interface Product {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-}
+import type { ProductCardModel } from "@/types/product";
 
 interface ProductGridProps {
-  products: Product[];
+  products: ProductCardModel[];
   showBadge?: boolean;
 }
 

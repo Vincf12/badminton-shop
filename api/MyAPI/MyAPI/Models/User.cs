@@ -11,10 +11,6 @@ namespace MyAPI.Models
         [Column("user_id")]
         public int UserId { get; set; }
 
-        [Required]
-        [Column("username")]
-        [StringLength(50)]
-        public string UserName { get; set; } = string.Empty;
 
         [Required]
         [Column("email")]
@@ -53,9 +49,6 @@ namespace MyAPI.Models
 
         [Column("email_verified")]
         public bool EmailVerified { get; set; } = false;
-
-        [Column("last_login")]
-        public DateTime? LastLogin { get; set; }
         
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

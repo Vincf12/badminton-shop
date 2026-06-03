@@ -1,6 +1,5 @@
 import React from 'react'
 import Link from 'next/link'
-import ProductGrid from './ProductGrid'
 
 type ProductsListProps = {
   title?: string

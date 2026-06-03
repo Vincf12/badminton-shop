@@ -38,3 +38,12 @@ d:\badminton-shop
 
     npm run dev -- --port 5173
     mở http://localhost:5173
+Tránh port bị chiếm dụng:
+
+    Chỉ giữ một terminal chạy backend.
+    Dừng bằng Ctrl+C trong terminal đang chạy dotnet run.
+    Nếu đã chạy `docker compose up -d`, service `backend` cũng sẽ giữ cổng 5211; hãy dừng riêng nó trước khi chạy local:
+    docker compose stop backend
+    Hoặc tắt PID đang nghe port 5211 trước khi chạy lại.
+    netstat -ano | findstr :5211
+    taskkill /PID ..... /F

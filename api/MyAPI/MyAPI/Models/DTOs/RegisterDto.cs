@@ -4,9 +4,6 @@ namespace MyAPI.Models.DTOs
 {
     public class RegisterDto
     {
-        [Required(ErrorMessage = "Username không được để trống")]
-        [StringLength(50)]
-        public string Username { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email không được để trống")]
         [EmailAddress(ErrorMessage = "Email không đúng định dạng")]
@@ -20,5 +17,8 @@ namespace MyAPI.Models.DTOs
         [Required(ErrorMessage = "Họ và tên không được để trống")]
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
+
+            [StringLength(20)]
+            public string? Phone { get; set; }
     }
 }

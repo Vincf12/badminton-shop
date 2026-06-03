@@ -1,7 +1,6 @@
 const API_BASE_URL = 'http://localhost:5211/api/Auth';
 
 export interface RegisterData {
-  username: string;
   fullName: string;
   email: string;
   password: string;
