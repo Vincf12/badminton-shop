@@ -1,0 +1,212 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MyAPI.Data;
+using MyAPI.Models;
+using MyAPI.Models.DTOs;
+
+namespace MyAPI.Controllers
+{
+    [Route("api/coupons")]
+    [ApiController]
+    public class CouponsController : ControllerBase
+    {
+        private readonly AppDbContext _context;
+
+        public CouponsController(AppDbContext context)
+        {
+            _context = context;
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpGet]
+        public async Task<IActionResult> GetCoupons()
+        {
+            return Ok(await _context.Coupons.ToListAsync());
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCoupon(int id)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.CouponId == id);
+
+            if (coupon == null)
+            {
+                return NotFound(new
+                {
+                    message = "Không tìm thấy coupon."
+                });
+            }
+
+            return Ok(coupon);
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPost]
+        public async Task<IActionResult> CreateCoupon(CouponUpsertDto dto)
+        {
+            var code = dto.Code.Trim().ToUpper();
+
+            bool exists = await _context.Coupons
+                .AnyAsync(c => c.Code == code);
+
+            if (exists)
+            {
+                return BadRequest(new
+                {
+                    message = "Mã coupon đã tồn tại."
+                });
+            }
+
+            var coupon = new Coupon
+            {
+                Code = code,
+                CouponName = dto.CouponName.Trim(),
+                DiscountType = dto.DiscountType,
+                DiscountValue = dto.DiscountValue,
+                MinimumOrderAmount = dto.MinimumOrderAmount,
+                MaximumDiscountAmount = dto.MaximumDiscountAmount,
+                UsageLimit = dto.UsageLimit,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                IsActive = dto.IsActive
+            };
+
+            _context.Coupons.Add(coupon);
+            await _context.SaveChangesAsync();
+
+            return Ok(coupon);
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateCoupon(int id, CouponUpsertDto dto)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.CouponId == id);
+
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+
+            coupon.Code = dto.Code.Trim().ToUpper();
+            coupon.CouponName = dto.CouponName.Trim();
+            coupon.DiscountType = dto.DiscountType;
+            coupon.DiscountValue = dto.DiscountValue;
+            coupon.MinimumOrderAmount = dto.MinimumOrderAmount;
+            coupon.MaximumDiscountAmount = dto.MaximumDiscountAmount;
+            coupon.UsageLimit = dto.UsageLimit;
+            coupon.StartDate = dto.StartDate;
+            coupon.EndDate = dto.EndDate;
+            coupon.IsActive = dto.IsActive;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Cập nhật coupon thành công."
+            });
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteCoupon(int id)
+        {
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.CouponId == id);
+
+            if (coupon == null)
+            {
+                return NotFound();
+            }
+
+            _context.Coupons.Remove(coupon);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("apply")]
+        public async Task<IActionResult> ApplyCoupon(ApplyCouponDto dto)
+        {
+            var code = dto.Code.Trim().ToUpper();
+
+            var coupon = await _context.Coupons
+                .FirstOrDefaultAsync(c => c.Code == code);
+
+            if (coupon == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Mã giảm giá không tồn tại."
+                });
+            }
+
+            if (!coupon.IsActive)
+            {
+                return BadRequest(new
+                {
+                    message = "Mã giảm giá đã bị khóa."
+                });
+            }
+
+            var now = DateTime.UtcNow;
+
+            if (now < coupon.StartDate || now > coupon.EndDate)
+            {
+                return BadRequest(new
+                {
+                    message = "Mã giảm giá đã hết hạn hoặc chưa có hiệu lực."
+                });
+            }
+
+            if (coupon.UsageLimit.HasValue &&
+                coupon.UsedCount >= coupon.UsageLimit.Value)
+            {
+                return BadRequest(new
+                {
+                    message = "Mã giảm giá đã hết lượt sử dụng."
+                });
+            }
+
+            if (dto.OrderAmount < coupon.MinimumOrderAmount)
+            {
+                return BadRequest(new
+                {
+                    message = $"Đơn hàng phải từ {coupon.MinimumOrderAmount:N0} VNĐ."
+                });
+            }
+
+            decimal discountAmount = 0;
+
+            if (coupon.DiscountType == "percentage")
+            {
+                discountAmount =
+                    dto.OrderAmount * coupon.DiscountValue / 100;
+
+                if (coupon.MaximumDiscountAmount.HasValue)
+                {
+                    discountAmount = Math.Min(
+                        discountAmount,
+                        coupon.MaximumDiscountAmount.Value);
+                }
+            }
+            else
+            {
+                discountAmount = coupon.DiscountValue;
+            }
+
+            return Ok(new
+            {
+                couponId = coupon.CouponId,
+                code = coupon.Code,
+                discountAmount,
+                finalAmount = dto.OrderAmount - discountAmount
+            });
+        }
+    }
+}

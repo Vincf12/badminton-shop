@@ -54,8 +54,8 @@ export default function RegisterPage() {
       console.log("Đăng ký thành công:", user);
       // Redirect to login page
       router.push("/login?message=Đăng ký thành công! Vui lòng đăng nhập.");
-    } catch (err: any) {
-      setError(err.message || "Có lỗi xảy ra khi đăng ký");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra khi đăng ký");
     } finally {
       setLoading(false);
     }
@@ -81,8 +81,6 @@ export default function RegisterPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700">
-                  Nhập Username
-
                   Nhập Họ và Tên
                 </label>
                 <div className="relative mt-1 mb-5">

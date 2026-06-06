@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const userData = await authService.getCurrentUser(token);
           setUser(userData);
-        } catch (error) {
+        } catch {
           // Token không hợp lệ, xóa khỏi localStorage
           authService.removeToken();
         }
@@ -44,9 +44,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authService.login({ email: contactInfo, password });
       authService.setToken(response.access_token);
-      
-      const userData = await authService.getCurrentUser(response.access_token);
-      setUser(userData);
+      setUser(response.user ?? await authService.getCurrentUser(response.access_token));
     } catch (error) {
       throw error;
     }

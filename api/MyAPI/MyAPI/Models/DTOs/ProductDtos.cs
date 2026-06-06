@@ -8,7 +8,8 @@ namespace MyAPI.Models.DTOs
         public int CategoryId { get; set; }
         public string CategoryName { get; set; } = string.Empty;
         public string ProductName { get; set; } = string.Empty;
-        public string? Brand { get; set; }
+        public int BrandId { get; set; }
+        public string BrandName { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public string? ImageUrl { get; set; }
@@ -22,33 +23,29 @@ namespace MyAPI.Models.DTOs
         public DateTime? UpdatedAt { get; set; }
     }
 
-    public class CategoryDto
-    {
-        public int CategoryId { get; set; }
-        public string CategoryName { get; set; } = string.Empty;
-    }
-
     public class ProductUpsertDto
     {
         [Required]
         public int CategoryId { get; set; }
 
         [Required]
-        [StringLength(150)]
+        public int BrandId { get; set; }
+
+        [Required]
+        [StringLength(200)]
         public string ProductName { get; set; } = string.Empty;
 
-        [StringLength(100)]
-        public string? Brand { get; set; }
+        public string? Slug { get; set; }
+        public string? ShortDescription { get; set; }
+        public string? Description { get; set; }
+        public string Status { get; set; } = "active";
+
+        public string? ImageUrl { get; set; }
 
         [Range(typeof(decimal), "0", "999999999999")]
         public decimal Price { get; set; }
 
         [Range(0, int.MaxValue)]
         public int Stock { get; set; }
-
-        [StringLength(255)]
-        public string? ImageUrl { get; set; }
-
-        public string? Description { get; set; }
     }
 }

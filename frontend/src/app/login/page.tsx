@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import AuthLeftColumn from "@/app/components/auth/AuthLeftColumn";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const [showPass, setShowPass] = useState(false);
   const [contactInfo, setContactInfo] = useState("");
   const [password, setPassword] = useState("");
@@ -33,8 +33,8 @@ export default function LoginPage() {
       await login(contactInfo, password);
       // Redirect sẽ được xử lý trong useEffect
       router.push("/");
-    } catch (error: any) {
-      setError(error.message || "Đăng nhập thất bại!");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Đăng nhập thất bại!");
     } finally {
       setLoading(false);
     }
@@ -151,5 +151,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

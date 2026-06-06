@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:5211/api/Auth';
+import { API_BASE_URL } from "./productService";
+
+const AUTH_API_URL = `${API_BASE_URL}/Auth`;
 
 export interface RegisterData {
   fullName: string;
@@ -13,138 +15,133 @@ export interface LoginData {
 }
 
 export interface User {
-  user_id: number;
+  id: number | string;
   fullName: string;
   email: string;
   phone?: string;
-  address?: string;
-  role: string;
-  created_at: string;
+  role?: string;
 }
 
 export interface AuthResponse {
   access_token: string;
   token_type: string;
+  user?: User;
+}
+
+async function readErrorMessage(response: Response, fallback: string): Promise<string> {
+  const contentType = response.headers.get("content-type") ?? "";
+
+  try {
+    if (contentType.includes("application/json")) {
+      const errorData = await response.json();
+
+      if (errorData?.errors && typeof errorData.errors === "object") {
+        return Object.values(errorData.errors).flat().filter(Boolean).join("; ") || fallback;
+      }
+
+      return errorData?.message || errorData?.detail || JSON.stringify(errorData) || fallback;
+    }
+
+    return (await response.text()) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+type ApiObject = Record<string, unknown>;
+
+function isObject(value: unknown): value is ApiObject {
+  return typeof value === "object" && value !== null;
+}
+
+function readString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function mapUser(data: unknown): User {
+  const dataObject = isObject(data) ? data : {};
+  const nestedSource = dataObject.currentUser ?? dataObject.user ?? dataObject;
+  const source = isObject(nestedSource) ? nestedSource : {};
+  const id = source.id ?? source.userId ?? source.user_id ?? "";
+  const email = readString(source.email) ?? "";
+  const fullName = readString(source.fullName) ?? readString(source.full_name) ?? email ?? "Khách hàng";
+
+  return {
+    id: typeof id === "number" || typeof id === "string" ? id : "",
+    fullName,
+    email,
+    phone: readString(source.phone),
+    role: readString(source.role),
+  };
 }
 
 class AuthService {
-  async register(data: RegisterData): Promise<User> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+  async register(data: RegisterData): Promise<{ message: string }> {
+    const response = await fetch(`${AUTH_API_URL}/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
-        let errMsg = 'Đăng ký thất bại';
-        try {
-          const ct = response.headers.get('content-type') || '';
-          if (ct.includes('application/json')) {
-            const errorData = await response.json();
-            // Handle ASP.NET Core validation errors shape: { errors: { Field: ["..."] } }
-            if (errorData?.errors && typeof errorData.errors === 'object') {
-              const msgs = Object.values(errorData.errors).flat().filter(Boolean);
-              errMsg = msgs.join('; ') || errMsg;
-            } else {
-              errMsg = errorData?.detail || errorData?.message || JSON.stringify(errorData) || errMsg;
-            }
-          } else {
-            const text = await response.text();
-            if (text) errMsg = text;
-          }
-        } catch (e) {
-          // ignore parse errors and keep default message
-        }
-        throw new Error(errMsg);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Register error:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(await readErrorMessage(response, "Đăng ký thất bại"));
     }
+
+    return response.json();
   }
 
   async login(data: LoginData): Promise<AuthResponse> {
-    try {
-      // Backend expects JSON { email, password } and returns { message, token, user }
-      const response = await fetch(`${API_BASE_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: data.email, password: data.password }),
-      });
+    const response = await fetch(`${AUTH_API_URL}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: data.email, password: data.password }),
+    });
 
-      if (!response.ok) {
-        let errMsg = 'Đăng nhập thất bại';
-        try {
-          const ct = response.headers.get('content-type') || '';
-          if (ct.includes('application/json')) {
-            const errorData = await response.json();
-            if (errorData?.errors && typeof errorData.errors === 'object') {
-              const msgs = Object.values(errorData.errors).flat().filter(Boolean);
-              errMsg = msgs.join('; ') || errMsg;
-            } else {
-              errMsg = errorData?.detail || errorData?.message || JSON.stringify(errorData) || errMsg;
-            }
-          } else {
-            const text = await response.text();
-            if (text) errMsg = text;
-          }
-        } catch (e) {
-          // ignore
-        }
-        throw new Error(errMsg);
-      }
-
-      // Normalize to { access_token, token_type } for frontend compatibility
-      const json = await response.json();
-      // backend returns token in `token` field
-      return { access_token: json.token, token_type: 'Bearer' } as AuthResponse;
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+    if (!response.ok) {
+      throw new Error(await readErrorMessage(response, "Đăng nhập thất bại"));
     }
+
+    const json = await response.json();
+
+    return {
+      access_token: json.token,
+      token_type: "Bearer",
+      user: mapUser(json.user),
+    };
   }
 
   async getCurrentUser(token: string): Promise<User> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Không thể lấy thông tin người dùng');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Get current user error:', error);
-      throw error;
-    }
+  const response = await fetch(`${AUTH_API_URL}/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+  if(!response.ok) {
+    throw new Error(await readErrorMessage(response, "Không thể lấy thông tin người dùng"));
   }
 
-  // Helper methods
+    return mapUser(await response.json());
+  }
+
   setToken(token: string): void {
-    localStorage.setItem('access_token', token);
+    localStorage.setItem("access_token", token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return localStorage.getItem("access_token");
   }
 
   removeToken(): void {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem("access_token");
   }
 
   isAuthenticated(): boolean {
-    return !!this.getToken();
+    return Boolean(this.getToken());
   }
 }
 

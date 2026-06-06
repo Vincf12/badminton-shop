@@ -1,4 +1,4 @@
-START TRANSACTION;
+﻿START TRANSACTION;
 
 INSERT INTO users (user_id, email, password_hash, full_name, phone, avatar_url, gender, birthdate, role, is_active, email_verified, created_at, updated_at) VALUES
 (1, 'a@example.com', 'hashed_password_123', 'Nguyễn Văn A', '0901234567', NULL, 'male', '1995-01-15', 'customer', TRUE, TRUE, '2026-05-29 08:00:00', NULL),
@@ -68,18 +68,18 @@ INSERT INTO cart_items (cart_item_id, cart_id, variant_id, quantity) VALUES
 INSERT INTO coupons (coupon_id, code, discount_type, discount_value, max_discount, min_order_value, start_date, end_date, usage_limit, is_active) VALUES
 (1, 'SUMMER2026', 'percentage', 10.00, 500000.00, 3000000.00, '2026-05-01 00:00:00', '2026-08-31 23:59:59', 100, TRUE);
 
-INSERT INTO orders (order_id, user_id, coupon_id, shipping_recipient_name, shipping_phone, shipping_province, shipping_district, shipping_ward, shipping_address_detail, total_amount, shipping_fee, discount_amount, final_amount, status, created_at) VALUES
-(1, 1, NULL, 'Nguyễn Văn A', '0901234567', 'Hà Nội', 'Cầu Giấy', 'Dịch Vọng Hậu', 'Số 12, ngõ 34, đường Trần Thái Tông', 3500000.00, 30000.00, 0.00, 3530000.00, 'confirmed', '2026-05-29 09:00:00'),
-(2, 2, 1, 'Trần Thị B', '0912345678', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Nghé', '25 Nguyễn Huệ, Phường Bến Nghé', 5100000.00, 30000.00, 500000.00, 4630000.00, 'shipping', '2026-05-29 10:15:00');
+INSERT INTO orders (order_id, user_id, coupon_id, order_code, shipping_recipient_name, shipping_phone, shipping_province, shipping_district, shipping_ward, shipping_address_detail, total_amount, shipping_fee, discount_amount, final_amount, status, created_at) VALUES
+(1, 1, NULL, 'ORD20260529090000001', 'Nguyễn Văn A', '0901234567', 'Hà Nội', 'Cầu Giấy', 'Dịch Vọng Hậu', 'Số 12, ngõ 34, đường Trần Thái Tông', 3500000.00, 30000.00, 0.00, 3530000.00, 'confirmed', '2026-05-29 09:00:00'),
+(2, 2, 1, 'ORD20260529101500002', 'Trần Thị B', '0912345678', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Nghé', '25 Nguyễn Huệ, Phường Bến Nghé', 5100000.00, 30000.00, 500000.00, 4630000.00, 'shipping', '2026-05-29 10:15:00');
 
 INSERT INTO order_details (order_detail_id, order_id, variant_id, quantity, unit_price, subtotal) VALUES
 (1, 1, 1, 1, 3500000.00, 3500000.00),
 (2, 2, 3, 1, 2900000.00, 2900000.00),
 (3, 2, 4, 1, 2200000.00, 2200000.00);
 
-INSERT INTO payments (payment_id, order_id, payment_method, payment_status, transaction_code, paid_at) VALUES
-(1, 1, 'cod', 'paid', 'COD-20260529-0001', '2026-05-29 09:30:00'),
-(2, 2, 'vnpay', 'pending', 'VN20260529-0001', NULL);
+INSERT INTO payments (payment_id, order_id, payment_method, payment_status, amount, transaction_code, paid_at) VALUES
+(1, 1, 'cod', 'paid', 3530000.00, 'COD-20260529-0001', '2026-05-29 09:30:00'),
+(2, 2, 'vnpay', 'pending', 4630000.00, 'VN20260529-0001', NULL);
 
 INSERT INTO shipments (shipment_id, order_id, tracking_number, courier, shipped_date, delivered_date, status) VALUES
 (1, 1, 'J&T123456', 'J&T Express', '2026-05-29 10:00:00', '2026-05-30 15:00:00', 'delivered'),

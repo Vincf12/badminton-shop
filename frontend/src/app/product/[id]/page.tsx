@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { ShoppingCart, Heart, Star, Minus, Plus } from "lucide-react";
 import { fetchProduct } from "@/services/productService";
+import { cartService } from "@/services/cartService";
 import type { ProductDetailModel } from "@/types/product";
 
 export default function ProductPage() {
@@ -19,6 +20,8 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [reviews, setReviews] = useState<
     { rating: number; comment: string; date: string }[]
   >([]);
@@ -65,8 +68,11 @@ export default function ProductPage() {
       return [];
     }
 
-    const image = product.image || "/assets/images/banner-netro.png";
-    return [image, image, image];
+    const variantImages = product.variants
+      .map((variant) => variant.image)
+      .filter((image): image is string => Boolean(image));
+    const uniqueImages = Array.from(new Set([product.image, ...variantImages]));
+    return uniqueImages.length > 0 ? uniqueImages : ["/assets/images/banner-netro.png"];
   }, [product]);
 
   const formatPrice = (price: number) =>
@@ -99,6 +105,31 @@ export default function ProductPage() {
     setRating(0);
     setComment("");
     alert("Cảm ơn bạn đã gửi đánh giá!");
+  };
+
+  const handleAddToCart = async () => {
+    if (!product) {
+      return;
+    }
+
+    const selectedVariant = product.variants.find((variant) => variant.stock > 0) ?? product.variants[0];
+
+    if (!selectedVariant) {
+      setCartMessage("Sản phẩm chưa có biến thể để thêm vào giỏ hàng.");
+      return;
+    }
+
+    setCartMessage(null);
+    setAddingToCart(true);
+
+    try {
+      await cartService.addItem(selectedVariant.id, quantity);
+      setCartMessage("Đã thêm sản phẩm vào giỏ hàng.");
+    } catch (addError) {
+      setCartMessage(addError instanceof Error ? addError.message : "Không thể thêm sản phẩm vào giỏ hàng.");
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   return (
@@ -205,7 +236,11 @@ export default function ProductPage() {
                       Mua ngay
                     </button>
 
-                    <button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl">
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={addingToCart || product.stock <= 0}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                    >
                       <ShoppingCart className="w-6 h-6" />
                       Thêm vào giỏ hàng
                     </button>
@@ -214,6 +249,11 @@ export default function ProductPage() {
                       <Heart className="w-6 h-6 text-gray-600" />
                     </button>
                   </div>
+                  {cartMessage ? (
+                    <p className={`text-sm font-medium ${cartMessage.startsWith("Đã") ? "text-emerald-600" : "text-red-600"}`}>
+                      {cartMessage}
+                    </p>
+                  ) : null}
 
                   <div className={`flex items-center gap-2 ${product.stock > 0 ? "text-emerald-600" : "text-red-600"}`}>
                     <div className={`w-2 h-2 rounded-full ${product.stock > 0 ? "bg-emerald-600" : "bg-red-600"}`} />

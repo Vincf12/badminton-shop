@@ -22,7 +22,7 @@ export default function AboutPage() {
               FlyShot
             </h1>
             <p className="text-xl md:text-2xl font-serif italic text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              "Nơi giọt mồ hôi chuyển hóa thành quỹ đạo hoàn mỹ. Chúng tôi không chỉ chế tạo vợt; chúng tôi định hình lại cách bạn làm chủ khoảng không."
+              &quot;Nơi giọt mồ hôi chuyển hóa thành quỹ đạo hoàn mỹ. Chúng tôi không chỉ chế tạo vợt; chúng tôi định hình lại cách bạn làm chủ khoảng không.&quot;
             </p>
           </div>
         </header>
@@ -50,7 +50,7 @@ export default function AboutPage() {
               
               {/* Editorial Blockquote */}
               <blockquote className="border-l-4 border-black pl-6 my-8 font-serif italic text-xl text-gray-900 bg-gray-50 py-4 pr-4">
-                "FlyShot không sinh ra để nằm trong túi đựng. Nó được sinh ra để cắt đôi không khí và để lại những tiếng vang đầy kiêu hãnh trên mặt sân."
+                &quot;FlyShot không sinh ra để nằm trong túi đựng. Nó được sinh ra để cắt đôi không khí và để lại những tiếng vang đầy kiêu hãnh trên mặt sân.&quot;
                 <cite className="block text-xs uppercase tracking-widest font-sans font-bold text-gray-400 mt-3 not-italic">
                   — Minh Vũ, Founder & CEO FlyShot
                 </cite>
@@ -209,7 +209,7 @@ export default function AboutPage() {
           <section className="mb-20 bg-gray-950 text-white p-8 md:p-12 text-center rounded-none">
             <span className="text-xs font-mono tracking-widest text-gray-500 block mb-4">FLYSHOT ELITE MANIFESTO</span>
             <h2 className="text-3xl md:text-4xl font-serif italic mb-6 max-w-2xl mx-auto leading-snug">
-              "Bạn đã sẵn sàng cùng FlyShot định nghĩa lại giới hạn của chính mình?"
+              &quot;Bạn đã sẵn sàng cùng FlyShot định nghĩa lại giới hạn của chính mình?&quot;
             </h2>
             <p className="text-sm text-gray-400 max-w-xl mx-auto leading-relaxed mb-8">
               Hệ thống của chúng tôi được xây dựng dựa trên sự cam kết tuyệt đối: 100% sản phẩm cao cấp, tư vấn chuyên sâu theo cơ địa, hỗ trợ kỹ thuật trọn đời.

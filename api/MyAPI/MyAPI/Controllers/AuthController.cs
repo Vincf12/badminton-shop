@@ -100,6 +100,71 @@ namespace MyAPI.Controllers
                 }
             });
         }
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> Me()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại" });
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (user == null)
+                return NotFound(new { message = "Người dùng không tồn tại" });
+
+            return Ok(new
+            {
+                id = user.UserId,
+                email = user.Email,
+                fullName = user.FullName,
+                phone = user.Phone,
+                role = user.Role
+            });
+        }
+
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+            {
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại" });
+            }
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return NotFound(new { message = "Người dùng không tồn tại" });
+            }
+
+            bool checkPassword = BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.PasswordHash);
+            if (!checkPassword)
+            {
+                return BadRequest(new { message = "Mật khẩu hiện tại không chính xác" });
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return Ok(new { message = "Đổi mật khẩu thành công" });
+
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            // Trong JWT, logout thường được xử lý ở phía client bằng cách xóa token
+            return Ok(new { message = "Đăng xuất thành công (hãy xóa token ở phía client)" });
+        }
+
 
         [Authorize]
         [HttpGet("profile")]

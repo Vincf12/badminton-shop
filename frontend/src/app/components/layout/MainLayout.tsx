@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingCart, User, Search, Menu, X, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { cartService } from "@/services/cartService";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,6 +17,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
   const { user, logout, isAuthenticated } = useAuth();
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +26,31 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  
+
+  useEffect(() => {
+    const loadCartCount = async () => {
+      if (!isAuthenticated) {
+        setCartCount(0);
+        return;
+      }
+
+      try {
+        const count = await cartService.getCartCount();
+        setCartCount(count);
+      } catch {
+        setCartCount(0);
+      }
+    };
+
+    loadCartCount();
+
+    window.addEventListener("cart-updated", loadCartCount);
+
+    return () => {
+      window.removeEventListener("cart-updated", loadCartCount);
+    };
+  }, [isAuthenticated]);
 
   // Đóng dropdown khi click outside
   useEffect(() => {
@@ -105,7 +132,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               >
                 <ShoppingCart className="w-6 h-6 text-slate-400" />
                 <span className="absolute -top-1 -right-1 bg-emerald-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  0
+                  {cartCount}
                 </span>
               </Link>
 
@@ -117,15 +144,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
                     className="hidden md:flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors duration-200 font-medium"
                   >
                     <User className="w-4 h-4" />
-                    <span>{user?.full_name}</span>
+                    <span>{user?.fullName}</span>
                   </button>
                   
                   {/* User Dropdown Menu */}
                   {showUserMenu && (
                     <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                       <div className="px-4 py-2 border-b border-gray-100">
-                        <p className="text-sm font-medium text-gray-900">{user?.full_name}</p>
-                        <p className="text-xs text-gray-500">{user?.email}</p>
+                        <p className="text-sm font-medium text-gray-900">{user?.fullName}</p>
                       </div>
                       <Link
                         href="/dashboard"
@@ -205,8 +231,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               {isAuthenticated ? (
                 <>
                   <div className="px-4 py-3 border-b border-gray-700">
-                    <p className="text-sm font-medium text-white">{user?.full_name}</p>
-                    <p className="text-xs text-gray-300">{user?.email}</p>
+                    <p className="text-sm font-medium text-white">{user?.fullName}</p>
                   </div>
                   <Link
                     href="/dashboard"

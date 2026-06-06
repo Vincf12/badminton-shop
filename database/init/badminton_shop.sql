@@ -159,6 +159,7 @@ CREATE TABLE orders (
     order_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     coupon_id INT NULL,
+    order_code VARCHAR(100) NOT NULL,
     shipping_recipient_name VARCHAR(100) NOT NULL,
     shipping_phone VARCHAR(20) NOT NULL,
     shipping_province VARCHAR(100) NOT NULL,
@@ -170,7 +171,9 @@ CREATE TABLE orders (
     discount_amount DECIMAL(12,2) UNSIGNED DEFAULT 0.00,
     final_amount DECIMAL(12,2) UNSIGNED DEFAULT 0.00,
     status ENUM('pending', 'confirmed', 'packing', 'shipping', 'delivered', 'cancelled') DEFAULT 'pending',
+    tracking_code VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
     FOREIGN KEY(user_id) REFERENCES users(user_id),
     FOREIGN KEY(coupon_id) REFERENCES coupons(coupon_id) ON DELETE SET NULL
 );
@@ -194,6 +197,7 @@ CREATE TABLE payments (
     order_id INT UNIQUE,
     payment_method ENUM('cod', 'vnpay', 'momo'),
     payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+    amount DECIMAL(12,2) UNSIGNED DEFAULT 0.00,
     transaction_code VARCHAR(100),
     paid_at DATETIME,
     FOREIGN KEY(order_id)

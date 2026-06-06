@@ -15,24 +15,24 @@ namespace MyAPI.Models
         public int CategoryId { get; set; }
 
         [Required]
+        [Column("brand_id")]
+        public int BrandId { get; set; }
+
+        [Required]
         [Column("product_name")]
         [StringLength(150)]
         public string ProductName { get; set; } = string.Empty;
 
-        [Column("brand")]
-        [StringLength(100)]
-        public string? Brand { get; set; }
-
-        [Required]
-        [Column("price", TypeName = "decimal(12,2)")]
-        public decimal Price { get; set; }
-
-        [Column("stock")]
-        public int Stock { get; set; }
-
-        [Column("image_url")]
+        [Column("slug")]
         [StringLength(255)]
-        public string? ImageUrl { get; set; }
+        public string? Slug { get; set; }
+
+        [Column("short_description")]
+        public string? ShortDescription { get; set; }
+
+        [Column("status")]
+        [StringLength(20)]
+        public string Status { get; set; } = "active";
 
         [Column("description")]
         public string? Description { get; set; }
@@ -42,5 +42,8 @@ namespace MyAPI.Models
 
         [Column("updated_at")]
         public DateTime? UpdatedAt { get; set; }
+
+        public Category Category { get; set; } = null!;
+        public Brand Brand { get; set; } = null!;
     }
 }
