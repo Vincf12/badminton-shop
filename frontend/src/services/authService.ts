@@ -58,6 +58,26 @@ function readString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+function decodeJwtPayload(token: string): ApiObject {
+  try {
+    const payload = token.split(".")[1];
+    const normalizedPayload = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(normalizedPayload);
+    const parsed = JSON.parse(json);
+    return isObject(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function readRoleFromToken(token: string): string | undefined {
+  const payload = decodeJwtPayload(token);
+  return (
+    readString(payload.role) ??
+    readString(payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"])
+  );
+}
+
 function mapUser(data: unknown): User {
   const dataObject = isObject(data) ? data : {};
   const nestedSource = dataObject.currentUser ?? dataObject.user ?? dataObject;
@@ -125,11 +145,16 @@ class AuthService {
     throw new Error(await readErrorMessage(response, "Không thể lấy thông tin người dùng"));
   }
 
-    return mapUser(await response.json());
+    const user = mapUser(await response.json());
+    return {
+      ...user,
+      role: user.role ?? readRoleFromToken(token),
+    };
   }
 
   setToken(token: string): void {
     localStorage.setItem("access_token", token);
+    document.cookie = `access_token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
   }
 
   getToken(): string | null {
@@ -138,6 +163,7 @@ class AuthService {
 
   removeToken(): void {
     localStorage.removeItem("access_token");
+    document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
   }
 
   isAuthenticated(): boolean {

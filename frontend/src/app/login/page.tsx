@@ -15,14 +15,14 @@ function LoginPageContent() {
   const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
 
   // Redirect nếu đã đăng nhập
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/");
+      router.push(user?.role === "admin" || user?.role === "staff" ? "/dashboard" : "/");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, user?.role]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +30,9 @@ function LoginPageContent() {
     setLoading(true);
     
     try {
-      await login(contactInfo, password);
+      const loggedInUser = await login(contactInfo, password);
       // Redirect sẽ được xử lý trong useEffect
-      router.push("/");
+      router.push(loggedInUser.role === "admin" || loggedInUser.role === "staff" ? "/dashboard" : "/");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Đăng nhập thất bại!");
     } finally {

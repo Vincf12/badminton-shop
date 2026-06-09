@@ -6,7 +6,7 @@ import { authService, User } from '@/services/authService';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -44,7 +44,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authService.login({ email: contactInfo, password });
       authService.setToken(response.access_token);
-      setUser(response.user ?? await authService.getCurrentUser(response.access_token));
+      const userData = response.user ?? await authService.getCurrentUser(response.access_token);
+      setUser(userData);
+      return userData;
     } catch (error) {
       throw error;
     }

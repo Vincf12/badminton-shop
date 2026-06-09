@@ -53,34 +53,54 @@ namespace MyAPI.Controllers
 
             if (type == "month")
             {
-                var monthlyRevenue = await _context.Orders
+                var monthlyRows = await _context.Orders
                     .AsNoTracking()
                     .Where(o => o.Status == "completed")
                     .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month })
                     .Select(g => new
                     {
-                        period = $"{g.Key.Year:D4}-{g.Key.Month:D2}",
+                        g.Key.Year,
+                        g.Key.Month,
                         revenue = g.Sum(o => o.FinalAmount),
                         orderCount = g.Count()
                     })
-                    .OrderBy(x => x.period)
+                    .OrderBy(x => x.Year)
+                    .ThenBy(x => x.Month)
                     .ToListAsync();
+
+                var monthlyRevenue = monthlyRows.Select(x => new
+                {
+                    period = $"{x.Year:D4}-{x.Month:D2}",
+                    x.revenue,
+                    x.orderCount
+                });
 
                 return Ok(monthlyRevenue);
             }
 
-            var dailyRevenue = await _context.Orders
+            var dailyRows = await _context.Orders
                 .AsNoTracking()
                 .Where(o => o.Status == "completed")
                 .GroupBy(o => new { o.CreatedAt.Year, o.CreatedAt.Month, o.CreatedAt.Day })
                 .Select(g => new
                 {
-                    period = $"{g.Key.Year:D4}-{g.Key.Month:D2}-{g.Key.Day:D2}",
+                    g.Key.Year,
+                    g.Key.Month,
+                    g.Key.Day,
                     revenue = g.Sum(o => o.FinalAmount),
                     orderCount = g.Count()
                 })
-                .OrderBy(x => x.period)
+                .OrderBy(x => x.Year)
+                .ThenBy(x => x.Month)
+                .ThenBy(x => x.Day)
                 .ToListAsync();
+
+            var dailyRevenue = dailyRows.Select(x => new
+            {
+                period = $"{x.Year:D4}-{x.Month:D2}-{x.Day:D2}",
+                x.revenue,
+                x.orderCount
+            });
 
             return Ok(dailyRevenue);
         }

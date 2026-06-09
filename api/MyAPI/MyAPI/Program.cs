@@ -5,12 +5,17 @@ using MyAPI.Data;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 using System.IO;
 
 // GIẢI PHÁP: Đặt biệt danh (Alias) là SwaggerModels để không bị trùng với MyAPI.Models của bạn
 using SwaggerModels = Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 // In development, load the repo root .env for local runs only.
 // When the API runs in Docker, compose-provided environment variables must win.
