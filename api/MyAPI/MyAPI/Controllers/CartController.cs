@@ -1,12 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Data;
-using MyAPI.Models;
 using MyAPI.Models.DTOs;
-using System.Security.Claims;
-using MyAPI.Services.Interfaces;
 using MyAPI.Services;
+using MyAPI.Services.Interfaces;
+using System.Security.Claims;
 
 namespace MyAPI.Controllers
 {
@@ -16,6 +13,7 @@ namespace MyAPI.Controllers
     public class CartController : ControllerBase
     {
         private readonly ICartService _cartService;
+
         public CartController(ICartService cartService)
         {
             _cartService = cartService;
@@ -26,83 +24,80 @@ namespace MyAPI.Controllers
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return int.TryParse(userIdClaim, out userId);
         }
-        private IActionResult HandleResult<T>(ServiceResult<T> result)
+
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
         {
-            if (result.StatusCode == 204)
-                return NoContent();
-
-            if (!result.Succeeded)
+            if (result.Succeeded)
             {
-                return StatusCode(result.StatusCode, new
-                {
-                    message = result.Message
-                });
+                return Ok(result.Data);
             }
 
-            if (result.Data == null)
+            if (result.StatusCode == StatusCodes.Status403Forbidden)
             {
-                return Ok(new
-                {
-                    message = result.Message
-                });
+                return Forbid();
             }
 
-            return Ok(result.Data);
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
+
         [HttpGet]
         public async Task<IActionResult> GetCart()
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _cartService.GetCartAsync(userId);
-            return HandleResult(result);
+            return ToActionResult(result);
         }
+
         [HttpPost("items")]
         public async Task<IActionResult> AddItem([FromBody] AddCartItemDto dto)
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized();
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _cartService.AddItemAsync(userId, dto);
-            return HandleResult(result);
+            return ToActionResult(result);
         }
-        [HttpPut("items/{int:int}")]
+
+        [HttpPut("items/{cartItemId:int}")]
         public async Task<IActionResult> UpdateItemQuantity(int cartItemId, [FromBody] UpdateCartItemDto dto)
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Bạn cần đăng nhập để thực hiện hành động này." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _cartService.UpdateItemQuantityAsync(userId, cartItemId, dto);
-            return HandleResult(result);
+            return ToActionResult(result);
         }
-        [HttpDelete("items/{int:int}")]
+
+        [HttpDelete("items/{cartItemId:int}")]
         public async Task<IActionResult> DeleteItem(int cartItemId)
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Bạn cần đăng nhập để thực hiện hành động này." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _cartService.DeleteItemAsync(userId, cartItemId);
-            return HandleResult(result);
+            return ToActionResult(result);
         }
+
         [HttpDelete("clear")]
         public async Task<IActionResult> ClearCart()
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Bạn cần đăng nhập để thực hiện hành động này." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _cartService.ClearCartAsync(userId);
-            return HandleResult(result);
+            return ToActionResult(result);
         }
     }
 }

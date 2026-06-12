@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Data;
-using MyAPI.Models;
 using MyAPI.Models.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 using System.Security.Claims;
 
 namespace MyAPI.Controllers
@@ -13,11 +12,11 @@ namespace MyAPI.Controllers
     [Authorize]
     public class PaymentsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IPaymentService _paymentService;
 
-        public PaymentsController(AppDbContext context)
+        public PaymentsController(IPaymentService paymentService)
         {
-            _context = context;
+            _paymentService = paymentService;
         }
 
         private bool TryGetCurrentUserId(out int userId)
@@ -31,251 +30,85 @@ namespace MyAPI.Controllers
             return User.IsInRole("admin") || User.IsInRole("staff");
         }
 
-        private static PaymentDto MapPayment(Payment payment)
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
         {
-            return new PaymentDto
+            if (result.Succeeded)
             {
-                PaymentId = payment.PaymentId,
-                OrderId = payment.OrderId,
-                PaymentMethod = payment.PaymentMethod,
-                PaymentStatus = payment.PaymentStatus,
-                Amount = payment.Amount,
-                TransactionCode = payment.TransactionCode,
-                PaidAt = payment.PaidAt,
-                CreatedAt = payment.CreatedAt
-            };
-        }
-
-        private async Task<Order?> GetAccessibleOrderAsync(int orderId)
-        {
-            if (!TryGetCurrentUserId(out int userId))
-            {
-                return null;
+                return Ok(result.Data);
             }
 
-            var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
-
-            if (order == null)
+            if (result.StatusCode == StatusCodes.Status403Forbidden)
             {
-                return null;
+                return Forbid();
             }
 
-            if (!IsAdminOrStaff() && order.UserId != userId)
-            {
-                return null;
-            }
-
-            return order;
-        }
-
-        private async Task<Payment> GetOrCreatePaymentAsync(Order order, string method)
-        {
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == order.OrderId);
-
-            if (payment != null)
-            {
-                payment.PaymentMethod = method;
-                payment.Amount = order.FinalAmount;
-                return payment;
-            }
-
-            payment = new Payment
-            {
-                OrderId = order.OrderId,
-                PaymentMethod = method,
-                PaymentStatus = "pending",
-                Amount = order.FinalAmount,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Payments.Add(payment);
-            return payment;
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
         [HttpGet("order/{orderId:int}")]
         public async Task<IActionResult> GetPaymentByOrder(int orderId)
         {
-            var order = await GetAccessibleOrderAsync(orderId);
-
-            if (order == null)
+            if (!TryGetCurrentUserId(out int userId))
             {
-                return NotFound(new { message = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var payment = await _context.Payments
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.OrderId == orderId);
-
-            if (payment == null)
-            {
-                return NotFound(new { message = "Đơn hàng chưa có thông tin thanh toán." });
-            }
-
-            return Ok(MapPayment(payment));
+            var result = await _paymentService.GetPaymentByOrderAsync(orderId, userId, IsAdminOrStaff());
+            return ToActionResult(result);
         }
 
         [HttpPost("vnpay/create")]
         public async Task<IActionResult> CreateVnPayPayment([FromBody] CreateGatewayPaymentDto dto)
         {
-            var order = await GetAccessibleOrderAsync(dto.OrderId);
-
-            if (order == null)
+            if (!TryGetCurrentUserId(out int userId))
             {
-                return NotFound(new { message = "Không tìm thấy đơn hàng hoặc bạn không có quyền thanh toán." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var payment = await GetOrCreatePaymentAsync(order, "vnpay");
-            payment.PaymentStatus = "pending";
-            payment.TransactionCode = $"VNPAY-{order.OrderCode}-{DateTime.UtcNow:yyyyMMddHHmmss}";
-
-            await _context.SaveChangesAsync();
-
             var callbackUrl = $"{Request.Scheme}://{Request.Host}/api/payments/vnpay/callback";
-            var paymentUrl = $"{callbackUrl}?vnp_TxnRef={order.OrderId}&vnp_ResponseCode=00&vnp_TransactionNo={Uri.EscapeDataString(payment.TransactionCode)}";
-
-            return Ok(new
-            {
-                message = "Tạo URL thanh toán VNPAY thành công.",
-                paymentId = payment.PaymentId,
-                orderId = order.OrderId,
-                amount = payment.Amount,
-                paymentUrl
-            });
+            var result = await _paymentService.CreateVnPayPaymentAsync(dto, userId, IsAdminOrStaff(), callbackUrl);
+            return ToActionResult(result);
         }
 
         [AllowAnonymous]
         [HttpGet("vnpay/callback")]
         public async Task<IActionResult> VnPayCallback()
         {
-            var txnRef = Request.Query["vnp_TxnRef"].ToString();
-            var responseCode = Request.Query["vnp_ResponseCode"].ToString();
-            var transactionNo = Request.Query["vnp_TransactionNo"].ToString();
+            var result = await _paymentService.VnPayCallbackAsync(
+                Request.Query["vnp_TxnRef"].ToString(),
+                Request.Query["vnp_ResponseCode"].ToString(),
+                Request.Query["vnp_TransactionNo"].ToString());
 
-            if (!int.TryParse(txnRef, out int orderId))
-            {
-                return BadRequest(new { message = "Mã đơn hàng callback không hợp lệ." });
-            }
-
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
-
-            if (payment == null)
-            {
-                return NotFound(new { message = "Không tìm thấy thanh toán." });
-            }
-
-            payment.PaymentMethod = "vnpay";
-            payment.TransactionCode = string.IsNullOrWhiteSpace(transactionNo) ? payment.TransactionCode : transactionNo;
-            payment.PaymentStatus = responseCode == "00" ? "paid" : "failed";
-            payment.PaidAt = responseCode == "00" ? DateTime.UtcNow : payment.PaidAt;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = responseCode == "00" ? "Thanh toán VNPAY thành công." : "Thanh toán VNPAY thất bại.",
-                payment = MapPayment(payment)
-            });
+            return ToActionResult(result);
         }
 
         [HttpPost("momo/create")]
         public async Task<IActionResult> CreateMomoPayment([FromBody] CreateGatewayPaymentDto dto)
         {
-            var order = await GetAccessibleOrderAsync(dto.OrderId);
-
-            if (order == null)
+            if (!TryGetCurrentUserId(out int userId))
             {
-                return NotFound(new { message = "Không tìm thấy đơn hàng hoặc bạn không có quyền thanh toán." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var payment = await GetOrCreatePaymentAsync(order, "momo");
-            payment.PaymentStatus = "pending";
-            payment.TransactionCode = $"MOMO-{order.OrderCode}-{DateTime.UtcNow:yyyyMMddHHmmss}";
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Tạo thanh toán Momo thành công.",
-                paymentId = payment.PaymentId,
-                orderId = order.OrderId,
-                amount = payment.Amount,
-                payUrl = dto.ReturnUrl ?? $"{Request.Scheme}://{Request.Host}/api/payments/momo/callback",
-                requestId = payment.TransactionCode
-            });
+            var fallbackPayUrl = $"{Request.Scheme}://{Request.Host}/api/payments/momo/callback";
+            var result = await _paymentService.CreateMomoPaymentAsync(dto, userId, IsAdminOrStaff(), fallbackPayUrl);
+            return ToActionResult(result);
         }
 
         [AllowAnonymous]
         [HttpPost("momo/callback")]
         public async Task<IActionResult> MomoCallback([FromBody] MomoCallbackDto dto)
         {
-            Order? order = null;
-
-            if (dto.OrderId.HasValue)
-            {
-                order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == dto.OrderId.Value);
-            }
-            else if (!string.IsNullOrWhiteSpace(dto.OrderCode))
-            {
-                order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderCode == dto.OrderCode);
-            }
-
-            if (order == null)
-            {
-                return NotFound(new { message = "Không tìm thấy đơn hàng." });
-            }
-
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == order.OrderId);
-
-            if (payment == null)
-            {
-                return NotFound(new { message = "Không tìm thấy thanh toán." });
-            }
-
-            var success = dto.ResultCode == "0" || string.Equals(dto.ResultCode, "success", StringComparison.OrdinalIgnoreCase);
-
-            payment.PaymentMethod = "momo";
-            payment.TransactionCode = string.IsNullOrWhiteSpace(dto.TransactionCode) ? payment.TransactionCode : dto.TransactionCode;
-            payment.PaymentStatus = success ? "paid" : "failed";
-            payment.PaidAt = success ? DateTime.UtcNow : payment.PaidAt;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = success ? "Thanh toán Momo thành công." : "Thanh toán Momo thất bại.",
-                payment = MapPayment(payment)
-            });
+            var result = await _paymentService.MomoCallbackAsync(dto);
+            return ToActionResult(result);
         }
 
         [Authorize(Roles = "admin,staff")]
         [HttpPut("{id:int}/status")]
         public async Task<IActionResult> UpdatePaymentStatus(int id, [FromBody] UpdatePaymentStatusDto dto)
         {
-            var validStatuses = new[] { "pending", "paid", "failed" };
-
-            if (!validStatuses.Contains(dto.Status))
-            {
-                return BadRequest(new { message = "Trạng thái thanh toán không hợp lệ." });
-            }
-
-            var payment = await _context.Payments.FirstOrDefaultAsync(p => p.PaymentId == id);
-
-            if (payment == null)
-            {
-                return NotFound(new { message = "Không tìm thấy thanh toán." });
-            }
-
-            payment.PaymentStatus = dto.Status;
-            payment.TransactionCode = string.IsNullOrWhiteSpace(dto.TransactionCode) ? payment.TransactionCode : dto.TransactionCode.Trim();
-            payment.PaidAt = dto.Status == "paid" ? DateTime.UtcNow : payment.PaidAt;
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Cập nhật trạng thái thanh toán thành công.",
-                payment = MapPayment(payment)
-            });
+            var result = await _paymentService.UpdatePaymentStatusAsync(id, dto);
+            return ToActionResult(result);
         }
     }
 }

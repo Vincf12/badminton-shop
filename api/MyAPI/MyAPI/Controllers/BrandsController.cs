@@ -1,9 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using MyAPI.Data;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Models; 
+using Microsoft.AspNetCore.Mvc;
 using MyAPI.Models.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 
 namespace MyAPI.Controllers
 {
@@ -11,118 +10,69 @@ namespace MyAPI.Controllers
     [ApiController]
     public class BrandsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IBrandService _brandService;
 
-        public BrandsController(AppDbContext context)
+        public BrandsController(IBrandService brandService)
         {
-            _context = context;
+            _brandService = brandService;
         }
 
-        // GET /api/brands
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BrandDto>>> GetBrands()
         {
-            var brands = await _context.Brands
-                .AsNoTracking()
-                .OrderBy(b => b.BrandName)
-                .Select(b => new BrandDto
-                {
-                    BrandId = b.BrandId,
-                    BrandName = b.BrandName
-                })
-                .ToListAsync();
-
+            var brands = await _brandService.GetBrandsAsync();
             return Ok(brands);
         }
 
-        // GET /api/brands/1
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<BrandDto>> GetBrand(int id)
+        public async Task<IActionResult> GetBrand(int id)
         {
-            var brand = await _context.Brands
-                .AsNoTracking()
-                .Where(b => b.BrandId == id)
-                .Select(b => new BrandDto
-                {
-                    BrandId = b.BrandId,
-                    BrandName = b.BrandName
-                })
-                .FirstOrDefaultAsync();
-
-            if (brand == null)
-            {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy thương hiệu."
-                });
-            }
-
-            return Ok(brand);
+            var result = await _brandService.GetBrandAsync(id);
+            return ToActionResult(result);
         }
-        // POST /api/brands
+
         [HttpPost]
         [Authorize(Roles = "admin,staff")]
-        public async Task<ActionResult> CreateBrand([FromBody] BrandUpsertDto dto)
+        public async Task<IActionResult> CreateBrand([FromBody] BrandUpsertDto dto)
         {
-            var brandName = dto.BrandName.Trim();
-            bool exists = await _context.Brands.AnyAsync(b => b.BrandName == brandName);
-            if (exists)
+            var result = await _brandService.CreateBrandAsync(dto);
+            if (!result.Succeeded)
             {
-                return BadRequest(new { message = "Thương hiệu đã tồn tại trên hệ thống" });
+                return ToActionResult(result);
             }
-            var brand = new Brand
-            {
-                BrandName = brandName
-            };
-           
-            _context.Brands.Add(brand);
-            await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetBrand), new { id = brand.BrandId }, new BrandDto 
-            {
-                BrandId = brand.BrandId,
-                BrandName = brand.BrandName 
-            });
+            return CreatedAtAction(nameof(GetBrand), new { id = result.Data!.BrandId }, result.Data);
         }
-        // PUT /api/brands/1
+
         [HttpPut("{id:int}")]
         [Authorize(Roles = "admin,staff")]
-        public async Task<ActionResult> UpdateBrand(int id, [FromBody] BrandUpsertDto dto)
+        public async Task<IActionResult> UpdateBrand(int id, [FromBody] BrandUpsertDto dto)
         {
-            var brand = await _context.Brands.FirstOrDefaultAsync(b => b.BrandId == id);
-            if (brand == null)
-            {
-                return NotFound(new { message = "Thương hiệu không tồn tại trên hệ thống" });
-            }
-            var brandName = dto.BrandName.Trim();
-            bool exists = await _context.Brands.AnyAsync(b => b.BrandName == brandName && b.BrandId != id);
-            if (exists)
-            {
-                return BadRequest(new { message = "Thương hiệu đã tồn tại trên hệ thống" });
-            }
-            brand.BrandName = brandName;
-            await _context.SaveChangesAsync();
-         
-            return Ok(new { message = "Cập nhật thương hiệu thành công" });
+            var result = await _brandService.UpdateBrandAsync(id, dto);
+            return ToActionResult(result);
         }
-        // DELETE /api/brands/1
+
         [HttpDelete("{id:int}")]
         [Authorize(Roles = "admin")]
-        public async Task<ActionResult> DeleteBrand(int id)
+        public async Task<IActionResult> DeleteBrand(int id)
         {
-            var brand = await _context.Brands.FirstOrDefaultAsync(b => b.BrandId == id);
-            if (brand == null)
+            var result = await _brandService.DeleteBrandAsync(id);
+            if (!result.Succeeded)
             {
-                return NotFound(new { message = "Thương hiệu không tồn tại trên hệ thống" });
+                return ToActionResult(result);
             }
-            bool hasProducts = await _context.Products.AnyAsync(p => p.BrandId == id);
-            if (hasProducts)
-            {
-                return BadRequest(new { message = "Không thể xóa thương hiệu vì đang có sản phẩm liên quan" });
-            }
-            _context.Brands.Remove(brand);
-            await _context.SaveChangesAsync();
+
             return NoContent();
+        }
+
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
+        {
+            if (result.Succeeded)
+            {
+                return result.Data != null ? Ok(result.Data) : Ok(new { message = result.Message });
+            }
+
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
     }
 }

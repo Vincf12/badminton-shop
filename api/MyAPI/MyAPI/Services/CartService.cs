@@ -35,6 +35,7 @@ namespace MyAPI.Services
 
             return cart;
         }
+
         public async Task<ServiceResult<CartDto>> GetCartAsync(int userId)
         {
             var cart = await GetOrCreateCartAsync(userId);
@@ -69,23 +70,25 @@ namespace MyAPI.Services
                 Items = items
             });
         }
+
         public async Task<ServiceResult<object>> AddItemAsync(int userId, AddCartItemDto dto)
         {
-            if (dto.Quantity <= 0) //Quantity > 0
+            if (dto.Quantity <= 0)
             {
                 return ServiceResult<object>.BadRequest("Số lượng phải lớn hơn 0.");
             }
-            var variant = await _context.ProductVariants // Variant phải tồn tại
+
+            var variant = await _context.ProductVariants
                 .FirstOrDefaultAsync(v => v.VariantId == dto.VariantId);
 
             if (variant == null)
             {
-                return ServiceResult<object>.NotFound("Phiên bản sản phẩm không tồn tại.");
+                return ServiceResult<object>.NotFound("Biến thể sản phẩm không tồn tại.");
             }
-            // kiem tra stock quantity
+
             if (variant.StockQuantity <= 0)
             {
-                return ServiceResult<object>.BadRequest("Phiên bản sản phẩm đã hết hàng.");
+                return ServiceResult<object>.BadRequest("Sản phẩm đã hết hàng.");
             }
 
             var cart = await GetOrCreateCartAsync(userId);
@@ -99,28 +102,29 @@ namespace MyAPI.Services
 
                 if (newQuantity > variant.StockQuantity)
                 {
-                    return ServiceResult<object>.BadRequest($"Số lượng trong giỏ hàng không thể vượt quá số lượng tồn kho ({variant.StockQuantity}).");
+                    return ServiceResult<object>.BadRequest($"Chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
                 }
+
                 cartItem.Quantity = newQuantity;
             }
             else
             {
                 if (dto.Quantity > variant.StockQuantity)
                 {
-                    return ServiceResult<object>.BadRequest($"Số lượng trong giỏ hàng không thể vượt quá số lượng tồn kho ({variant.StockQuantity}).");
+                    return ServiceResult<object>.BadRequest($"Chỉ còn {variant.StockQuantity} sản phẩm trong kho.");
                 }
 
-                cartItem = new CartItem
+                _context.CartItems.Add(new CartItem
                 {
                     CartId = cart.CartId,
                     VariantId = dto.VariantId,
                     Quantity = dto.Quantity
-                };
-                _context.CartItems.Add(cartItem);
+                });
             }
 
             await _context.SaveChangesAsync();
-            return ServiceResult<object>.OK("Sản phẩm đã được thêm vào giỏ hàng.");
+
+            return ServiceResult<object>.Ok(new { message = "Đã thêm sản phẩm vào giỏ hàng." });
         }
 
         public async Task<ServiceResult<object>> UpdateItemQuantityAsync(int userId, int cartItemId, UpdateCartItemDto dto)
@@ -145,23 +149,25 @@ namespace MyAPI.Services
 
             if (variant == null)
             {
-                return ServiceResult<object>.NotFound("Phiên bản sản phẩm không tồn tại.");
+                return ServiceResult<object>.NotFound("Biến thể sản phẩm không tồn tại.");
             }
 
-             if (dto.Quantity > variant.StockQuantity)
-             {
-                 return ServiceResult<object>.BadRequest($"Số lượng trong giỏ hàng không thể vượt quá số lượng tồn kho ({variant.StockQuantity}).");
-             }
+            if (dto.Quantity > variant.StockQuantity)
+            {
+                return ServiceResult<object>.BadRequest("Số lượng vượt quá tồn kho.");
+            }
 
-             cartItem.Quantity = dto.Quantity;
+            cartItem.Quantity = dto.Quantity;
 
-             await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-             return ServiceResult<object>.OK("Số lượng sản phẩm đã được cập nhật.");
+            return ServiceResult<object>.Ok(new { message = "Cập nhật số lượng thành công." });
         }
+
         public async Task<ServiceResult<object>> DeleteItemAsync(int userId, int cartItemId)
         {
             var cart = await GetOrCreateCartAsync(userId);
+
             var item = await _context.CartItems
                 .FirstOrDefaultAsync(i => i.CartItemId == cartItemId && i.CartId == cart.CartId);
 
@@ -173,20 +179,18 @@ namespace MyAPI.Services
             _context.CartItems.Remove(item);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Sản phẩm đã được xóa khỏi giỏ hàng.");
+            return ServiceResult<object>.Ok(new { message = "Đã xóa sản phẩm khỏi giỏ hàng." });
         }
 
         public async Task<ServiceResult<object>> ClearCartAsync(int userId)
         {
             var cart = await GetOrCreateCartAsync(userId);
-
-            var items = _context.CartItems.Where(i => i.CartId == cart.CartId);
+            var items = await _context.CartItems.Where(i => i.CartId == cart.CartId).ToListAsync();
 
             _context.CartItems.RemoveRange(items);
-
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Đã xóa tất cả sản phẩm khỏi giỏ hàng.");
+            return ServiceResult<object>.Ok(new { message = "Đã xóa tất cả sản phẩm khỏi giỏ hàng." });
         }
     }
 }

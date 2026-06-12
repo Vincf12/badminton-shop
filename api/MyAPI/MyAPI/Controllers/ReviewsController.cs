@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Data;
-using MyAPI.Models;
 using MyAPI.Models.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 using System.Security.Claims;
 
 namespace MyAPI.Controllers
@@ -11,11 +10,11 @@ namespace MyAPI.Controllers
     [ApiController]
     public class ReviewsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IReviewService _reviewService;
 
-        public ReviewsController(AppDbContext context)
+        public ReviewsController(IReviewService reviewService)
         {
-            _context = context;
+            _reviewService = reviewService;
         }
 
         private bool TryGetCurrentUserId(out int userId)
@@ -24,41 +23,27 @@ namespace MyAPI.Controllers
             return int.TryParse(userIdClaim, out userId);
         }
 
-        private bool IsAdmin()
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
         {
-            return User.IsInRole("admin");
+            if (result.Succeeded)
+            {
+                return Ok(result.Data);
+            }
+
+            if (result.StatusCode == StatusCodes.Status403Forbidden)
+            {
+                return Forbid();
+            }
+
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
         [AllowAnonymous]
         [HttpGet("api/products/{productId:int}/reviews")]
         public async Task<IActionResult> GetProductReviews(int productId)
         {
-            var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
-
-            if (!productExists)
-            {
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
-            }
-
-            var reviews = await (
-                from review in _context.Reviews.AsNoTracking()
-                join user in _context.Users.AsNoTracking()
-                    on review.UserId equals user.UserId
-                where review.ProductId == productId
-                orderby review.CreatedAt descending
-                select new ReviewDto
-                {
-                    ReviewId = review.ReviewId,
-                    UserId = review.UserId,
-                    FullName = user.FullName,
-                    ProductId = review.ProductId,
-                    Rating = review.Rating,
-                    Comment = review.Comment,
-                    CreatedAt = review.CreatedAt
-                })
-                .ToListAsync();
-
-            return Ok(reviews);
+            var result = await _reviewService.GetProductReviewsAsync(productId);
+            return ToActionResult(result);
         }
 
         [Authorize]
@@ -70,44 +55,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
-
-            if (!productExists)
-            {
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
-            }
-
-            var exists = await _context.Reviews.AnyAsync(r => r.UserId == userId && r.ProductId == productId);
-
-            if (exists)
-            {
-                return BadRequest(new { message = "Bạn đã đánh giá sản phẩm này." });
-            }
-
-            var review = new Review
-            {
-                UserId = userId,
-                ProductId = productId,
-                Rating = dto.Rating,
-                Comment = string.IsNullOrWhiteSpace(dto.Comment) ? null : dto.Comment.Trim(),
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Reviews.Add(review);
-            await _context.SaveChangesAsync();
-
-            var user = await _context.Users.AsNoTracking().FirstAsync(u => u.UserId == userId);
-
-            return Ok(new ReviewDto
-            {
-                ReviewId = review.ReviewId,
-                UserId = review.UserId,
-                FullName = user.FullName,
-                ProductId = review.ProductId,
-                Rating = review.Rating,
-                Comment = review.Comment,
-                CreatedAt = review.CreatedAt
-            });
+            var result = await _reviewService.CreateReviewAsync(productId, userId, dto);
+            return ToActionResult(result);
         }
 
         [Authorize]
@@ -119,24 +68,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == id);
-
-            if (review == null)
-            {
-                return NotFound(new { message = "Không tìm thấy đánh giá." });
-            }
-
-            if (review.UserId != userId)
-            {
-                return Forbid();
-            }
-
-            review.Rating = dto.Rating;
-            review.Comment = string.IsNullOrWhiteSpace(dto.Comment) ? null : dto.Comment.Trim();
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Cập nhật đánh giá thành công." });
+            var result = await _reviewService.UpdateReviewAsync(id, userId, dto);
+            return ToActionResult(result);
         }
 
         [Authorize]
@@ -148,22 +81,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var review = await _context.Reviews.FirstOrDefaultAsync(r => r.ReviewId == id);
-
-            if (review == null)
-            {
-                return NotFound(new { message = "Không tìm thấy đánh giá." });
-            }
-
-            if (!IsAdmin() && review.UserId != userId)
-            {
-                return Forbid();
-            }
-
-            _context.Reviews.Remove(review);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var result = await _reviewService.DeleteReviewAsync(id, userId, User.IsInRole("admin"));
+            return ToActionResult(result);
         }
     }
 }

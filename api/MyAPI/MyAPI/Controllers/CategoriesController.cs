@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Data;
-using MyAPI.Models;
 using MyAPI.Models.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 
 namespace MyAPI.Controllers
 {
@@ -11,163 +10,69 @@ namespace MyAPI.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICategoryService _categoryService;
 
-        public CategoriesController(AppDbContext context)
+        public CategoriesController(ICategoryService categoryService)
         {
-            _context = context;
+            _categoryService = categoryService;
         }
 
-        // GET /api/categories
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories()
         {
-            var categories = await _context.Categories
-                .AsNoTracking()
-                .OrderBy(c => c.CategoryName)
-                .Select(c => new CategoryDto
-                {
-                    CategoryId = c.CategoryId,
-                    CategoryName = c.CategoryName
-                })
-                .ToListAsync();
-
+            var categories = await _categoryService.GetCategoriesAsync();
             return Ok(categories);
         }
 
-        // GET /api/categories/1
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<CategoryDto>> GetCategory(int id)
+        public async Task<IActionResult> GetCategory(int id)
         {
-            var category = await _context.Categories
-                .AsNoTracking()
-                .Where(c => c.CategoryId == id)
-                .Select(c => new CategoryDto
-                {
-                    CategoryId = c.CategoryId,
-                    CategoryName = c.CategoryName
-                })
-                .FirstOrDefaultAsync();
-
-            if (category == null)
-            {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy danh mục."
-                });
-            }
-
-            return Ok(category);
+            var result = await _categoryService.GetCategoryAsync(id);
+            return ToActionResult(result);
         }
 
-        // POST /api/categories
         [Authorize(Roles = "admin,staff")]
         [HttpPost]
-        public async Task<ActionResult<CategoryDto>> CreateCategory(
-            [FromBody] CategoryUpsertDto dto)
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryUpsertDto dto)
         {
-            bool exists = await _context.Categories
-                .AnyAsync(c => c.CategoryName == dto.CategoryName);
-
-            if (exists)
+            var result = await _categoryService.CreateCategoryAsync(dto);
+            if (!result.Succeeded)
             {
-                return BadRequest(new
-                {
-                    message = "Danh mục đã tồn tại."
-                });
+                return ToActionResult(result);
             }
 
-            var category = new Category
-            {
-                CategoryName = dto.CategoryName.Trim()
-            };
-
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(
-                nameof(GetCategory),
-                new { id = category.CategoryId },
-                new CategoryDto
-                {
-                    CategoryId = category.CategoryId,
-                    CategoryName = category.CategoryName
-                });
+            return CreatedAtAction(nameof(GetCategory), new { id = result.Data!.CategoryId }, result.Data);
         }
 
-        // PUT /api/categories/1
         [Authorize(Roles = "admin,staff")]
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateCategory(
-            int id,
-            [FromBody] CategoryUpsertDto dto)
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryUpsertDto dto)
         {
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.CategoryId == id);
-
-            if (category == null)
-            {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy danh mục."
-                });
-            }
-
-            bool exists = await _context.Categories
-                .AnyAsync(c =>
-                    c.CategoryId != id &&
-                    c.CategoryName == dto.CategoryName);
-
-            if (exists)
-            {
-                return BadRequest(new
-                {
-                    message = "Tên danh mục đã tồn tại."
-                });
-            }
-
-            category.CategoryName = dto.CategoryName.Trim();
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new
-            {
-                message = "Cập nhật danh mục thành công."
-            });
+            var result = await _categoryService.UpdateCategoryAsync(id, dto);
+            return ToActionResult(result);
         }
 
-        // DELETE /api/categories/1
         [Authorize(Roles = "admin")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(c => c.CategoryId == id);
-
-            if (category == null)
+            var result = await _categoryService.DeleteCategoryAsync(id);
+            if (!result.Succeeded)
             {
-                return NotFound(new
-                {
-                    message = "Không tìm thấy danh mục."
-                });
+                return ToActionResult(result);
             }
-
-            bool hasProducts = await _context.Products
-                .AnyAsync(p => p.CategoryId == id);
-
-            if (hasProducts)
-            {
-                return BadRequest(new
-                {
-                    message = "Không thể xóa danh mục vì đang có sản phẩm."
-                });
-            }
-
-            _context.Categories.Remove(category);
-
-            await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
+        {
+            if (result.Succeeded)
+            {
+                return result.Data != null ? Ok(result.Data) : Ok(new { message = result.Message });
+            }
+
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
     }
 }

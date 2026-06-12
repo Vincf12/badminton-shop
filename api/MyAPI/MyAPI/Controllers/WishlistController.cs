@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Data;
-using MyAPI.Models;
 using MyAPI.Models.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
 using System.Security.Claims;
 
 namespace MyAPI.Controllers
@@ -13,11 +12,11 @@ namespace MyAPI.Controllers
     [Authorize]
     public class WishlistController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IWishlistService _wishlistService;
 
-        public WishlistController(AppDbContext context)
+        public WishlistController(IWishlistService wishlistService)
         {
-            _context = context;
+            _wishlistService = wishlistService;
         }
 
         private bool TryGetCurrentUserId(out int userId)
@@ -26,24 +25,19 @@ namespace MyAPI.Controllers
             return int.TryParse(userIdClaim, out userId);
         }
 
-        private async Task<Wishlist> GetOrCreateWishlistAsync(int userId)
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
         {
-            var wishlist = await _context.Wishlists.FirstOrDefaultAsync(w => w.UserId == userId);
-
-            if (wishlist != null)
+            if (result.Succeeded)
             {
-                return wishlist;
+                return Ok(result.Data);
             }
 
-            wishlist = new Wishlist
+            if (result.StatusCode == StatusCodes.Status403Forbidden)
             {
-                UserId = userId
-            };
+                return Forbid();
+            }
 
-            _context.Wishlists.Add(wishlist);
-            await _context.SaveChangesAsync();
-
-            return wishlist;
+            return StatusCode(result.StatusCode, new { message = result.Message });
         }
 
         [HttpGet]
@@ -54,45 +48,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var wishlist = await GetOrCreateWishlistAsync(userId);
-
-            var items = await (
-                from item in _context.WishlistItems.AsNoTracking()
-                join product in _context.Products.AsNoTracking()
-                    on item.ProductId equals product.ProductId
-                join category in _context.Categories.AsNoTracking()
-                    on product.CategoryId equals category.CategoryId
-                join brand in _context.Brands.AsNoTracking()
-                    on product.BrandId equals brand.BrandId
-                where item.WishlistId == wishlist.WishlistId
-                select new WishlistItemDto
-                {
-                    WishlistItemId = item.WishlistItemId,
-                    ProductId = product.ProductId,
-                    ProductName = product.ProductName,
-                    CategoryName = category.CategoryName,
-                    BrandName = brand.BrandName,
-                    Price = _context.ProductVariants
-                        .Where(v => v.ProductId == product.ProductId)
-                        .OrderBy(v => v.VariantId)
-                        .Select(v => v.Price)
-                        .FirstOrDefault(),
-                    Stock = _context.ProductVariants
-                        .Where(v => v.ProductId == product.ProductId)
-                        .Sum(v => v.StockQuantity),
-                    ImageUrl = _context.ProductImages
-                        .Where(i => i.ProductId == product.ProductId && i.IsMain)
-                        .OrderBy(i => i.SortOrder)
-                        .Select(i => i.ImageUrl)
-                        .FirstOrDefault()
-                })
-                .ToListAsync();
-
-            return Ok(new WishlistDto
-            {
-                WishlistId = wishlist.WishlistId,
-                Items = items
-            });
+            var result = await _wishlistService.GetWishlistAsync(userId);
+            return ToActionResult(result);
         }
 
         [HttpPost("items")]
@@ -103,30 +60,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var productExists = await _context.Products.AnyAsync(p => p.ProductId == dto.ProductId);
-
-            if (!productExists)
-            {
-                return NotFound(new { message = "Không tìm thấy sản phẩm." });
-            }
-
-            var wishlist = await GetOrCreateWishlistAsync(userId);
-            var exists = await _context.WishlistItems.AnyAsync(i => i.WishlistId == wishlist.WishlistId && i.ProductId == dto.ProductId);
-
-            if (exists)
-            {
-                return BadRequest(new { message = "Sản phẩm đã có trong danh sách yêu thích." });
-            }
-
-            _context.WishlistItems.Add(new WishlistItem
-            {
-                WishlistId = wishlist.WishlistId,
-                ProductId = dto.ProductId
-            });
-
-            await _context.SaveChangesAsync();
-
-            return Ok(new { message = "Đã thêm sản phẩm vào danh sách yêu thích." });
+            var result = await _wishlistService.AddWishlistItemAsync(userId, dto);
+            return ToActionResult(result);
         }
 
         [HttpDelete("items/{productId:int}")]
@@ -137,19 +72,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var wishlist = await GetOrCreateWishlistAsync(userId);
-            var item = await _context.WishlistItems
-                .FirstOrDefaultAsync(i => i.WishlistId == wishlist.WishlistId && i.ProductId == productId);
-
-            if (item == null)
-            {
-                return NotFound(new { message = "Sản phẩm không có trong danh sách yêu thích." });
-            }
-
-            _context.WishlistItems.Remove(item);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            var result = await _wishlistService.DeleteWishlistItemAsync(userId, productId);
+            return ToActionResult(result);
         }
 
         [HttpGet("check/{productId:int}")]
@@ -160,15 +84,8 @@ namespace MyAPI.Controllers
                 return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
-            var wishlist = await GetOrCreateWishlistAsync(userId);
-            var exists = await _context.WishlistItems
-                .AnyAsync(i => i.WishlistId == wishlist.WishlistId && i.ProductId == productId);
-
-            return Ok(new
-            {
-                productId,
-                isWishlisted = exists
-            });
+            var result = await _wishlistService.CheckWishlistItemAsync(userId, productId);
+            return ToActionResult(result);
         }
     }
 }
