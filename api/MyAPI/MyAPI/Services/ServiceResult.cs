@@ -41,7 +41,7 @@ namespace MyAPI.Services
             return Error(StatusCodes.Status403Forbidden, message);
         }
 
-        private static ServiceResult<T> Error(int statusCode, string message)
+        public static ServiceResult<T> Error(int statusCode, string message)
         {
             return new ServiceResult<T>
             {

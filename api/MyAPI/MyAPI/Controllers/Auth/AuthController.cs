@@ -1,0 +1,90 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using MyAPI.Application.DTOs;
+using MyAPI.Services;
+using MyAPI.Services.Interfaces;
+
+namespace MyAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : ControllerBase
+    {
+        private readonly IAuthService _authService;
+        private readonly IAccountService _accountService;
+
+        public AuthController(IAuthService authService, IAccountService accountService)
+        {
+            _authService = authService;
+            _accountService = accountService;
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            var result = await _authService.RegisterAsync(dto);
+            return ToActionResult(result);
+        }
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var result = await _authService.LoginAsync(dto);
+            return ToActionResult(result);
+        }
+
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<IActionResult> Me()
+        {
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
+            }
+
+            var result = await _accountService.GetCurrentUserAsync(userId);
+            return ToActionResult(result);
+        }
+
+        [HttpPut("change-password")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (!TryGetCurrentUserId(out var userId))
+            {
+                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
+            }
+
+            var result = await _accountService.ChangePasswordAsync(userId, dto);
+            return ToActionResult(result);
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            return Ok(new { message = "Dang xuat thanh cong. Hay xoa token o phia client." });
+        }
+
+        private bool TryGetCurrentUserId(out int userId)
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return int.TryParse(userIdClaim, out userId);
+        }
+
+        private IActionResult ToActionResult<T>(ServiceResult<T> result)
+        {
+            if (result.Succeeded)
+            {
+                return result.Data != null ? Ok(result.Data) : Ok(new { message = result.Message });
+            }
+
+            return StatusCode(result.StatusCode, new { message = result.Message });
+        }
+    }
+}

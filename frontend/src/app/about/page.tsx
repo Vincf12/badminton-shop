@@ -1,277 +1,205 @@
-'use client'
+import Image from "next/image";
+import Link from "next/link";
+import { Gauge, ShieldCheck, SlidersHorizontal, Sparkles } from "lucide-react";
+import { MainLayout } from "@/widgets/layout";
 
-import React from 'react'
-import Link from 'next/link'
-import MainLayout from '../components/layout/MainLayout'
+const stats = [
+  { value: "2018", label: "Thành lập tại TP. Hồ Chí Minh" },
+  { value: "5K+", label: "Người chơi đã được FlyShot phục vụ" },
+  { value: "42", label: "Bước kiểm tra khung và dây" },
+];
+
+const principles = [
+  {
+    title: "Tốc độ vung vợt nhanh hơn",
+    description: "Khung khí động học và điểm cân bằng nhẹ giúp người chơi xử lý các pha cầu cuối trận với ít lực cản hơn.",
+  },
+  {
+    title: "Cấu hình đúng lối chơi",
+    description: "Mỗi tư vấn đều kết hợp trọng lượng vợt, lực căng dây, cỡ cán và phong cách di chuyển của bạn.",
+  },
+  {
+    title: "Chăm sóc sẵn sàng ra sân",
+    description: "Căng dây, kiểm tra gen vợt và bảo hành luôn bám sát cách người chơi thật sự tập luyện.",
+  },
+];
+
+const services = [
+  {
+    icon: SlidersHorizontal,
+    title: "Căng dây theo cá nhân",
+    description: "Chúng tôi tinh chỉnh lực căng theo tốc độ vung vợt, điểm tiếp xúc và cảm giác cầu bạn mong muốn.",
+  },
+  {
+    icon: Gauge,
+    title: "Thử vợt hiệu năng",
+    description: "Một số mẫu vợt có thể được trải nghiệm trước khi mua để lựa chọn cuối cùng thật chắc chắn trên sân.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Mua sắm được bảo vệ",
+    description: "Chính sách đổi trả, bảo hành và kiểm định rõ ràng giúp thiết bị cao cấp dễ sở hữu hơn.",
+  },
+];
 
 export default function AboutPage() {
   return (
     <MainLayout>
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-        <h1 className="text-3xl text-black font-bold mb-4">Về Chúng Tôi</h1>
-        <p className="text-gray-700 mb-6">
-          FlyShot là thương hiệu vợt cầu lông cao cấp được thành lập vào năm 2018 bởi một nhóm đam mê thể thao và công nghệ. Chúng tôi cam kết mang đến cho người chơi những trải nghiệm tốt nhất trên sân đấu thông qua sự kết hợp giữa thiết kế tinh tế và công nghệ tiên tiến.
-        </p>
-        {/* Editorial Header Hero */}
-        <header className="border-b border-gray-300 py-16 md:py-24 ">
-          <div className="max-w-5xl mx-auto px-4 text-center">
-            <p className="text-xs tracking-[0.3em] uppercase text-gray-400 font-bold mb-4">
-              The FlyShot Chronicles
+      <div className="mx-auto w-full max-w-7xl text-[#061017]">
+        <section className="grid min-h-[calc(100dvh-120px)] grid-cols-1 items-center gap-8 py-10 lg:grid-cols-[1.02fr_0.98fr] lg:py-14">
+          <div className="max-w-2xl">
+            <p className="mb-5 text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
+              Nhà hiệu năng FlyShot
             </p>
-            <h1 className="text-5xl md:text-7xl font-black uppercase tracking-tight text-gray-900 mb-8 leading-[0.95]">
-              FlyShot
+            <h1 className="text-5xl font-black leading-[0.92] tracking-[-0.06em] text-[#061017] sm:text-6xl lg:text-7xl">
+              Dành cho người chơi cảm được nhịp cầu sớm hơn.
             </h1>
-            <p className="text-xl md:text-2xl font-serif italic text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              &quot;Nơi giọt mồ hôi chuyển hóa thành quỹ đạo hoàn mỹ. Chúng tôi không chỉ chế tạo vợt; chúng tôi định hình lại cách bạn làm chủ khoảng không.&quot;
+            <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
+              FlyShot tuyển chọn thiết bị cầu lông cao cấp cho người chơi đề cao tốc độ, độ chính xác và cảm giác của một cú chạm cầu gọn gàng.
             </p>
-          </div>
-        </header>
-        {/* Main Content Container */}
-        <div className="w-full px-4 py-16">
-          
-          {/* Section 1: Khởi đầu */}
-          <section className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4">
-              <span className="text-xs font-mono font-bold text-gray-400 block mb-2">01 / LỊCH SỬ</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">
-                Khởi Đầu Từ Một Ý Niệm Điên Rồ
-              </h2>
-            </div>
-            <div className="md:col-span-8 text-gray-700 space-y-6 text-lg leading-relaxed">
-              <h3 className="text-xl font-bold text-gray-900 font-sans italic">
-                Đường cong hoàn hảo không sinh ra từ phòng thí nghiệm thông thường.
-              </h3>
-              <p>
-                Mọi chuyện bắt đầu vào mùa hè năm 2018 tại một xưởng cơ khí nhỏ vùng ngoại ô. Khi đó, những người sáng lập của FlyShot – một kỹ sư hàng không vũ trụ và một cựu vận động viên chuyên nghiệp – cùng nhìn về một hướng: <span className="italic font-medium text-gray-950">Tại sao cây vợt cầu lông phải luôn tuân theo những giới hạn truyền thống?</span>
-              </p>
-              <p>
-                Họ nhận ra rằng, phần lớn người chơi đang phải hy sinh tốc độ để đổi lấy sức mạnh, hoặc ngược lại. FlyShot ra đời với một sứ mệnh duy nhất: phá vỡ thế độc tôn của sự thỏa hiệp. Chúng tôi muốn tạo ra một thứ vũ khí mà ở đó, sợi carbon không chỉ là vật liệu, nó là phần mở rộng của cánh tay bạn.
-              </p>
-              
-              {/* Editorial Blockquote */}
-              <blockquote className="border-l-4 border-black pl-6 my-8 font-serif italic text-xl text-gray-900 bg-gray-50 py-4 pr-4">
-                &quot;FlyShot không sinh ra để nằm trong túi đựng. Nó được sinh ra để cắt đôi không khí và để lại những tiếng vang đầy kiêu hãnh trên mặt sân.&quot;
-                <cite className="block text-xs uppercase tracking-widest font-sans font-bold text-gray-400 mt-3 not-italic">
-                  — Minh Vũ, Founder & CEO FlyShot
-                </cite>
-              </blockquote>
-            </div>
-          </section>
-
-          <hr className="border-gray-200 my-12" />
-
-          {/* Section 2: Triết lý thiết kế */}
-          <section className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4">
-              <span className="text-xs font-mono font-bold text-gray-400 block mb-2">02 / TRIẾT LÝ</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">
-                Bản Giao Hưởng Của Khí Động Học
-              </h2>
-            </div>
-            <div className="md:col-span-8 text-gray-700 space-y-6 text-lg leading-relaxed">
-              <h3 className="text-xl font-bold text-gray-900 font-sans italic">
-                Khi công nghệ tối tân cúi đầu trước nghệ thuật chuyển động.
-              </h3>
-              <p>
-                Tại FlyShot, chúng tôi tin rằng mỗi cú đập cầu (smash) là một tác phẩm nghệ thuật. Để tác phẩm đó đạt đến độ chín muồi, cây vợt phải đạt được sự cân bằng tuyệt đối giữa ba yếu tố: <span className="font-semibold text-gray-950">Trọng lượng siêu nhẹ</span>, <span className="font-semibold text-gray-950">Độ đàn hồi phản hồi tức thì</span>, và <span className="font-semibold text-gray-950">Khung vợt xé gió</span>.
-              </p>
-              <p>
-                Chúng tôi áp dụng cấu trúc khung <span className="font-medium">Aero-Dynamic Grid</span> mô phỏng cánh máy bay chiến đấu, giúp giảm tối đa lực cản không khí. Kết hợp với công nghệ sợi carbon mật độ cao, mỗi cây vợt FlyShot cho phép bạn vung vợt nhanh hơn 0.15 giây so với tiêu chuẩn thông thường.
-              </p>
-
-              {/* Editorial Table */}
-              <div className="pt-6 overflow-x-auto">
-                <p className="text-xs uppercase tracking-widest font-bold text-gray-400 mb-3">Những Cột Mốc Định Hình Thương Hiệu</p>
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead>
-                    <tr className="border-b-2 border-gray-900">
-                      <th className="py-2 font-mono font-bold text-gray-500 w-16">NĂM</th>
-                      <th className="py-2 font-bold text-gray-900 pr-4">CỘT MỐC PHÁT TRIỂN</th>
-                      <th className="py-2 font-bold text-gray-900">THÀNH TỰU ĐẠT ĐƯỢC</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    <tr>
-                      <td className="py-3 font-mono font-bold">2019</td>
-                      <td className="py-3 font-medium pr-4">Thử nghiệm khung vợt Air-Slice</td>
-                      <td className="py-3 text-gray-600">Giảm 12% lực cản không khí so với khung oval truyền thống.</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 font-mono font-bold">2021</td>
-                      <td className="py-3 font-medium pr-4">Ra mắt BST FlyShot Prime đầu tiên</td>
-                      <td className="py-3 text-gray-600">Cháy hàng 5.000 bản giới hạn chỉ trong vòng 48 giờ ra mắt.</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 font-mono font-bold">2024</td>
-                      <td className="py-3 font-medium pr-4">Đồng hành cùng giải đấu Quốc tế</td>
-                      <td className="py-3 text-gray-600">Trở thành nhà tài trợ chính thức cho 3 tay vợt nằm trong Top 50 thế giới.</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-
-          <hr className="border-gray-200 my-12" />
-
-          {/* Section 3: Đặc quyền dịch vụ */}
-          <section className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4">
-              <span className="text-xs font-mono font-bold text-gray-400 block mb-2">03 / ĐẶC QUYỀN</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">
-                Dịch Vụ Chuẩn FlyShot
-              </h2>
-            </div>
-            <div className="md:col-span-8 text-gray-700 space-y-8 text-lg leading-relaxed">
-              <h3 className="text-xl font-bold text-gray-900 font-sans italic">
-                Khi bạn chọn FlyShot, bạn đang tham gia vào một hệ sinh thái chăm sóc đẳng cấp VIP.
-              </h3>
-              
-              <div className="space-y-6">
-                <div>
-                  <h4 className="font-bold text-gray-950 text-base uppercase tracking-wider mb-1">Cá Nhân Hóa Trải Nghiệm (Bespoke Stringing)</h4>
-                  <p className="text-gray-600">Tại các Flagship Store, chúng tôi đo áp lực tay bằng cảm biến để tư vấn loại lưới và số kg căng vợt chính xác đến từng micro-vừa vặn với lối chơi của riêng bạn.</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-950 text-base uppercase tracking-wider mb-1">Thử Vợt Miễn Phí (The Test Drive)</h4>
-                  <p className="text-gray-600">Chương trình cho phép bạn mượn vợt trải nghiệm ngay tại sân đấu trong vòng 3 ngày trước khi đưa ra quyết định mua hàng chính thức.</p>
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-950 text-base uppercase tracking-wider mb-1">Bảo Dưỡng Trọn Đời (Lifetime Wellness)</h4>
-                  <p className="text-gray-600">Thay gen vợt định kỳ miễn phí và kiểm tra độ cân bằng của khung định kỳ mỗi 6 tháng tại tất cả các trung tâm bảo hành.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <hr className="border-gray-200 my-12" />
-
-          {/* Section 4: Chính sách bảo vệ */}
-          <section className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4">
-              <span className="text-xs font-mono font-bold text-gray-400 block mb-2">04 / CHÍNH SÁCH</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">
-                Chính Sách Bảo Vệ Tuyệt Đối
-              </h2>
-            </div>
-            <div className="md:col-span-8 text-gray-700 space-y-6 text-lg leading-relaxed">
-              <h3 className="text-xl font-bold text-gray-900 font-sans italic">
-                Niềm tin là thứ vật liệu đắt giá nhất cấu thành nên FlyShot.
-              </h3>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                <div className="border border-gray-200 p-6 rounded-none hover:border-black transition-colors">
-                  <span className="text-xs font-mono font-bold text-gray-400 block mb-3">01 . BẢO HÀNH</span>
-                  <p className="font-bold text-gray-950 mb-2">1 Đổi 1 Trong 90 Ngày</p>
-                  <p className="text-sm text-gray-500">Nếu xuất hiện vết nứt do lỗi kết cấu carbon từ nhà sản xuất.</p>
-                </div>
-                <div className="border border-gray-200 p-6 rounded-none hover:border-black transition-colors">
-                  <span className="text-xs font-mono font-bold text-gray-400 block mb-3">02 . ĐỔI TRẢ</span>
-                  <p className="font-bold text-gray-950 mb-2">7 Ngày Không Lý Do</p>
-                  <p className="text-sm text-gray-500">Hoàn tiền 100% nếu sản phẩm còn nguyên vẹn tem mác, chưa bóc seal cán.</p>
-                </div>
-                <div className="border border-gray-200 p-6 rounded-none hover:border-black transition-colors">
-                  <span className="text-xs font-mono font-bold text-gray-400 block mb-3">03 . GIAO HÀNG</span>
-                  <p className="font-bold text-gray-950 mb-2">Hỏa Tốc Đặc Quyền</p>
-                  <p className="text-sm text-gray-500">Giao nhanh 2H nội thành và bảo hiểm hư hại 100% toàn quốc.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <hr className="border-gray-200 my-12" />
-
-          {/* Section 5: Đội ngũ & Con người */}
-          <section className="mb-20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-            <div className="md:col-span-4 sticky top-6">
-              <span className="text-xs font-mono font-bold text-gray-400 block mb-2">05 / CON NGƯỜI</span>
-              <h2 className="text-2xl font-black uppercase tracking-tight text-gray-950">
-                Phía Sau Những Đường Cầu
-              </h2>
-            </div>
-            <div className="md:col-span-8 text-gray-700 space-y-6 text-lg leading-relaxed">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div>
-                  <p className="font-mono text-xs text-gray-400 font-bold">R&D DIRECTOR</p>
-                  <h4 className="font-bold text-gray-950 text-lg mb-2">Trần Tiến Đạt</h4>
-                  <p className="text-sm text-gray-600">Chuyên gia với 12 năm kinh nghiệm ngành vật liệu composite. Người ám ảnh bởi việc tối ưu hóa khung vợt mỏng thêm 0.1mm.</p>
-                </div>
-                <div>
-                  <p className="font-mono text-xs text-gray-400 font-bold">CHIEF DESIGNER</p>
-                  <h4 className="font-bold text-gray-950 text-lg mb-2">Elena Rostova</h4>
-                  <p className="text-sm text-gray-600">Đến từ Milan, Elena mang tư duy thẩm mỹ nghệ thuật thời trang Ý vào các họa tiết góc cạnh, mạnh mẽ trên thân vợt FlyShot.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Big Editorial Manifesto Section */}
-          <section className="mb-20 bg-gray-950 text-white p-8 md:p-12 text-center rounded-none">
-            <span className="text-xs font-mono tracking-widest text-gray-500 block mb-4">FLYSHOT ELITE MANIFESTO</span>
-            <h2 className="text-3xl md:text-4xl font-serif italic mb-6 max-w-2xl mx-auto leading-snug">
-              &quot;Bạn đã sẵn sàng cùng FlyShot định nghĩa lại giới hạn của chính mình?&quot;
-            </h2>
-            <p className="text-sm text-gray-400 max-w-xl mx-auto leading-relaxed mb-8">
-              Hệ thống của chúng tôi được xây dựng dựa trên sự cam kết tuyệt đối: 100% sản phẩm cao cấp, tư vấn chuyên sâu theo cơ địa, hỗ trợ kỹ thuật trọn đời.
-            </p>
-            <div className="flex flex-wrap justify-center gap-12 border-t border-gray-800 pt-8">
-              <div>
-                <div className="text-3xl font-black tracking-tight font-mono">5K+</div>
-                <div className="text-xs uppercase tracking-wider text-gray-500 mt-1">Hội Viên Thân Thiết</div>
-              </div>
-              <div>
-                <div className="text-3xl font-black tracking-tight font-mono">0.15s</div>
-                <div className="text-xs uppercase tracking-wider text-gray-500 mt-1">Tốc Độ Vung Vợt Nhanh Hơn</div>
-              </div>
-              <div>
-                <div className="text-3xl font-black tracking-tight font-mono">42</div>
-                <div className="text-xs uppercase tracking-wider text-gray-500 mt-1">Bài Kiểm Tra Áp Lực</div>
-              </div>
-            </div>
-          </section>
-
-          {/* Editorial Footer / Contact CTA */}
-          <footer className="border border-gray-200 p-8 md:p-12 text-center rounded-none">
-            <h3 className="text-xl font-bold uppercase tracking-wider text-gray-950 mb-8">
-              KẾT NỐI VỚI CHÚNG TÔI
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 text-left border-b border-gray-100 pb-8">
-              <div>
-                <span className="text-xs font-mono text-gray-400 block mb-1">HOTLINE</span>
-                <span className="font-bold text-gray-950">0123 456 789</span>
-              </div>
-              <div>
-                <span className="text-xs font-mono text-gray-400 block mb-1">EMAIL</span>
-                <span className="font-bold text-gray-950 text-sm break-all">contact@flyshot.vn</span>
-              </div>
-              <div>
-                <span className="text-xs font-mono text-gray-400 block mb-1">FLAGSHIP STORE</span>
-                <span className="font-bold text-gray-950">TP. Hồ Chí Minh</span>
-              </div>
-              <div>
-                <span className="text-xs font-mono text-gray-400 block mb-1">GIỜ LÀM VIỆC</span>
-                <span className="font-bold text-gray-950">08:00 — 21:00</span>
-              </div>
-            </div>
-            
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/shop"
-                className="px-8 py-3 bg-gray-950 text-white font-bold uppercase tracking-wider text-xs hover:bg-gray-800 transition-colors"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-[#061017] px-6 text-sm font-bold text-white transition-all duration-200 hover:bg-[#12202c] active:translate-y-px"
               >
-                Khám Phá Các Bộ Sưu Tập
+                Mua thiết bị hiệu năng
               </Link>
               <Link
                 href="/contact"
-                className="px-8 py-3 bg-white text-gray-950 font-bold uppercase tracking-wider text-xs border border-gray-950 hover:bg-gray-50 transition-colors"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-[#061017] transition-all duration-200 hover:border-[#061017] active:translate-y-px"
               >
-                Yêu Cầu Đặt Lịch Tư Vấn
+                Đặt lịch tư vấn
               </Link>
             </div>
-          </footer>
+          </div>
 
-        </div>
+          <div className="relative min-h-[420px] overflow-hidden rounded-[28px] border border-white/70 bg-[#061017] shadow-[0_28px_80px_rgba(6,16,23,0.22)]">
+            <Image
+              src="/assets/images/banner-flyshot01.png"
+              alt="Người chơi cầu lông FlyShot và thiết bị cao cấp"
+              fill
+              sizes="(min-width: 1024px) 46vw, 100vw"
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-[#061017]/82 via-[#061017]/18 to-transparent" />
+            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+              <div className="grid grid-cols-3 gap-3 rounded-3xl border border-white/14 bg-white/10 p-3 text-white backdrop-blur-xl">
+                {stats.map((stat) => (
+                  <div key={stat.value} className="rounded-2xl bg-white/10 p-3">
+                    <div className="text-2xl font-black tracking-[-0.04em]">{stat.value}</div>
+                    <div className="mt-1 text-[11px] font-medium leading-4 text-white/68">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="border-y border-slate-200 py-10 lg:py-14">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.7fr_1.3fr]">
+            <div>
+              <h2 className="text-3xl font-black tracking-[-0.04em] text-[#061017] sm:text-4xl">
+                Chúng tôi thiết kế trải nghiệm mua sắm quanh từng pha cầu.
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+              {principles.map((principle) => (
+                <div key={principle.title} className="border-l border-slate-200 pl-5">
+                  <h3 className="text-base font-black text-[#061017]">{principle.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{principle.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:py-16">
+          <div className="relative min-h-[360px] overflow-hidden rounded-[28px] bg-slate-200">
+            <Image
+              src="/assets/images/badmintonimage1.png"
+              alt="Chi tiết vợt cầu lông được FlyShot tuyển chọn"
+              fill
+              sizes="(min-width: 1024px) 42vw, 100vw"
+              className="object-cover"
+            />
+          </div>
+
+          <div className="flex flex-col justify-center">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800">
+              <Sparkles className="h-5 w-5" strokeWidth={1.8} />
+            </div>
+            <h2 className="max-w-xl text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[#061017] sm:text-5xl">
+              Cao cấp không phải là xa cách. Cao cấp là chính xác.
+            </h2>
+            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
+              Đội ngũ của chúng tôi kết hợp kiến thức sản phẩm với trải nghiệm trên sân. Chúng tôi tìm hiểu cách bạn phòng thủ, hồi vị và mất nhịp ở đâu, rồi thu hẹp lựa chọn vào những thiết bị cải thiện đúng các khoảnh khắc đó.
+            </p>
+
+            <div className="mt-8 space-y-4">
+              {services.map((service) => {
+                const Icon = service.icon;
+
+                return (
+                  <div key={service.title} className="flex gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#061017] text-white">
+                      <Icon className="h-5 w-5" strokeWidth={1.8} />
+                    </div>
+                    <div>
+                      <h3 className="font-black text-[#061017]">{service.title}</h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">{service.description}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="overflow-hidden rounded-[28px] bg-[#061017] text-white">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
+            <div className="p-7 sm:p-10 lg:p-12">
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-300">
+                Tiêu chuẩn FlyShot
+              </p>
+              <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.98] tracking-[-0.05em] sm:text-5xl">
+                Thiết bị được tuyển chọn với kỷ luật của một buổi chuẩn bị thi đấu.
+              </h2>
+              <p className="mt-6 max-w-2xl text-base leading-7 text-white/68">
+                Từ tư vấn ban đầu đến hỗ trợ sau bán hàng, mỗi bước đều được xây dựng để giảm phỏng đoán và giúp người chơi tập trung vào di chuyển, thời điểm ra vợt và khả năng kiểm soát.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 border-t border-white/10 lg:border-l lg:border-t-0">
+              {["Nguồn hàng chính hãng", "Tư vấn kỹ thuật theo lối chơi", "Hỗ trợ địa phương nhanh"].map((item) => (
+                <div key={item} className="flex items-center border-b border-white/10 px-7 py-6 last:border-b-0 sm:px-10">
+                  <span className="mr-4 h-2 w-2 rounded-full bg-emerald-300" />
+                  <span className="text-sm font-bold text-white/86">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 text-center lg:py-16">
+          <h2 className="mx-auto max-w-2xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#061017] sm:text-5xl">
+            Tìm cấu hình khiến cú đánh tiếp theo của bạn trở nên chắc chắn hơn.
+          </h2>
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <Link
+              href="/shop"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-black text-[#061017] transition-all duration-200 hover:bg-emerald-400 active:translate-y-px"
+            >
+              Khám phá FlyShot
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-black text-[#061017] transition-all duration-200 hover:border-[#061017] active:translate-y-px"
+            >
+              Trao đổi với chuyên viên
+            </Link>
+          </div>
+        </section>
       </div>
     </MainLayout>
-  )
+  );
 }

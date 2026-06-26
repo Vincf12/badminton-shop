@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AuthLeftColumn from "@/app/components/auth/AuthLeftColumn";
-import { authService, RegisterData } from "@/services/authService";
+import { AuthLeftColumn } from "@/features/auth";
+import { authService, RegisterData } from "@/features/auth";
 
 export default function RegisterPage() {
   const [showPass, setShowPass] = useState(false);

@@ -29,7 +29,7 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/features/auth";
 import {
   dashboardService,
   type DashboardData,
@@ -37,7 +37,7 @@ import {
   type OrderStatusStat,
   type RecentOrder,
   type RevenuePoint,
-} from "@/services/dashboardService";
+} from "@/widgets/dashboard";
 
 const statusConfig: Record<string, { label: string; badge: string; dot: string }> = {
   pending: {

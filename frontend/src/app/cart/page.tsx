@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
-import MainLayout from "@/app/components/layout/MainLayout";
+import { MainLayout } from "@/widgets/layout";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus } from "lucide-react";
-import { cartService } from "@/services/cartService";
-import type { CartItemModel } from "@/types/cart";
+import { cartService } from "@/entities/cart";
+import type { CartItemModel } from "@/entities/cart";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItemModel[]>([]);

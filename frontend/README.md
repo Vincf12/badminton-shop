@@ -1,65 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Badminton Shop Frontend
 
-## Getting Started
+Frontend cho FlyShot Badminton Shop, xây dựng bằng Next.js App Router, React, TypeScript và Tailwind CSS.
 
-First, run the development server:
+## Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mặc định ứng dụng chạy tại `http://localhost:3000` khi dùng `npm run dev`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Cấu trúc
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-
-cấu trúc
+```text
 frontend/
-├── src/
-│   ├── app/                    # Next.js App Router
-│   │   ├── components/         # Layouts chính
-│   │   │   ├── MainLayout.tsx
-│   │   │   └── AuthLayout.tsx
-│   │   ├── cart/page.tsx       # Giỏ hàng
-│   │   ├── dashboard/page.tsx  # Bảng điều khiển
-│   │   ├── login/page.tsx      # Đăng nhập
-│   │   ├── register/page.tsx   # Đăng ký
-│   │   ├── shop/page.tsx       # Cửa hàng
-│   │   ├── page.tsx            # Trang chủ
-│   │   ├── layout.tsx          # Root layout
-│   │   └── globals.css         # Global styles
-│   ├── components/             # Components tái sử dụng
-│   │   └── LoginLeftColumn.tsx
-│   ├── features/               # Feature modules
-│   ├── hooks/                  # Custom hooks
-│   ├── services/               # API services
-│   ├── types/                  # TypeScript types
-│   └── utils/                  # Utility functions
 ├── public/
-│   └── assets/
-│       └── images/             # Tất cả hình ảnh
-└── package.json
+│   └── assets/images/        # Hình ảnh tĩnh
+├── src/
+│   ├── app/                  # Next.js App Router
+│   │   ├── about/page.tsx
+│   │   ├── cart/page.tsx
+│   │   ├── contact/page.tsx
+│   │   ├── dashboard/page.tsx
+│   │   ├── login/page.tsx
+│   │   ├── product/[id]/page.tsx
+│   │   ├── register/page.tsx
+│   │   ├── shop/page.tsx
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/           # Component dùng chung
+│   │   ├── auth/
+│   │   ├── home/
+│   │   ├── layout/
+│   │   └── product/
+│   ├── contexts/             # React context
+│   ├── services/             # API service layer
+│   ├── types/                # TypeScript types
+│   ├── features/             # Feature modules, dùng khi cần tách logic lớn
+│   ├── hooks/                # Custom hooks
+│   └── utils/                # Hàm tiện ích
+├── next.config.ts
+├── package.json
+└── tsconfig.json
+```
 
+## Quy ước
+
+- Route, layout và page đặt trong `src/app`.
+- Component tái sử dụng đặt trong `src/components`, import bằng alias `@/components/...`.
+- API call đặt trong `src/services`.
+- Type dùng chung đặt trong `src/types`.
+- Chỉ thêm `"use client"` cho component hoặc page thật sự cần state, effect, browser API hoặc event handler.
+
+## Biến môi trường
+
+Tạo file `.env` hoặc `.env.local` từ `.env.example` nếu cần cấu hình API:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:5211/api
+```

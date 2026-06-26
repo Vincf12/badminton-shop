@@ -1,31 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using MyAPI.Data;
+using MyAPI.Infrastructure.Persistence;
+using MyAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 using System.IO;
 
-// GIẢI PHÁP: Đặt biệt danh (Alias) là SwaggerModels để không bị trùng với MyAPI.Models của bạn
+// Dung alias SwaggerModels de tranh trung ten voi cac model OpenAPI.
 using SwaggerModels = Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<ICartService, CartService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<IPaymentService, PaymentService>();
-builder.Services.AddScoped<IShipmentService, ShipmentService>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IWishlistService, WishlistService>();
-builder.Services.AddScoped<IDashboardService, DashboardService>();
-builder.Services.AddScoped<ICategoryService, CategoryService>();
-builder.Services.AddScoped<IBrandService, BrandService>();
-builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddApplicationServices();
 
 // In development, load the repo root .env for local runs only.
 // When the API runs in Docker, compose-provided environment variables must win.

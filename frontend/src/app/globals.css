@@ -1,43 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;700&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --background: #f6f8f7;
+  --foreground: #07120f;
+  --surface: #ffffff;
+  --muted: #647067;
+  --accent: #059669;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: 'Noto Sans', Arial, Helvetica, sans-serif;
-  --font-serif: 'Noto Serif', Georgia, serif;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
 }
 
-/* Ensure Tailwind utility .font-serif and .font-mono use fonts with Vietnamese support */
-.font-serif {
-  font-family: var(--font-serif) !important;
-}
 .font-sans {
   font-family: var(--font-sans) !important;
 }
+
 .font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Noto Sans Mono', monospace !important;
+  font-family: var(--font-mono) !important;
 }
 
-/* Prevent unwanted word-breaking for Vietnamese */
 body, p, h1, h2, h3, h4, h5, h6 {
   word-break: keep-all;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--accent) 22%, white);
+  color: var(--foreground);
 }

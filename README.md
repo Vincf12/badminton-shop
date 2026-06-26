@@ -16,7 +16,7 @@ d:\badminton-shop
 1. Mở database
     Nếu bạn dùng MySQL local trên máy: chỉ cần đảm bảo service MySQL đang chạy.
     Nếu bạn dùng Docker DB thì chạy:
-    docker compose up -d db phpmyadmin
+   docker compose up -d db phpmyadmin 
 2. Chạy backend
     Mở PowerShell trong thư mục backend C#:
     cd D:\badminton-shop\api\MyAPI\MyAPI
@@ -34,16 +34,5 @@ d:\badminton-shop
     Hoặc HTTP: http://localhost:5211/openapi/v1.json
     Swagger UI: http://localhost:5211/swagger
     Phpmyadmin: http://localhost:8080
-    Nếu bạn muốn chạy đúng cổng 5173 cho frontend:
 
-    npm run dev -- --port 5173
     mở http://localhost:5173
-Tránh port bị chiếm dụng:
-
-    Chỉ giữ một terminal chạy backend.
-    Dừng bằng Ctrl+C trong terminal đang chạy dotnet run.
-    Nếu đã chạy `docker compose up -d`, service `backend` cũng sẽ giữ cổng 5211; hãy dừng riêng nó trước khi chạy local:
-    docker compose stop backend
-    Hoặc tắt PID đang nghe port 5211 trước khi chạy lại.
-    netstat -ano | findstr :5211
-    taskkill /PID ..... /F

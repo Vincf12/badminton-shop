@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import MainLayout from '../components/layout/MainLayout'
+import { MainLayout } from "@/widgets/layout";
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({

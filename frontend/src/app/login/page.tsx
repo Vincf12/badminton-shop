@@ -4,8 +4,8 @@ import React, { Suspense, useState, useEffect } from "react";
 import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import AuthLeftColumn from "@/app/components/auth/AuthLeftColumn";
+import { useAuth } from "@/features/auth";
+import { AuthLeftColumn } from "@/features/auth";
 
 function LoginPageContent() {
   const [showPass, setShowPass] = useState(false);
