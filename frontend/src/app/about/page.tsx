@@ -1,26 +1,77 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Gauge, ShieldCheck, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Be_Vietnam_Pro, Inter } from "next/font/google";
+import {
+  Gauge,
+  MapPin,
+  Clock,
+  ShieldCheck,
+  SlidersHorizontal,
+  Quote,
+  ArrowRight,
+} from "lucide-react";
 import { MainLayout } from "@/widgets/layout";
 
+const display = Be_Vietnam_Pro({
+  subsets: ["vietnamese", "latin"],
+  weight: ["600", "700", "800"],
+  display: "swap",
+});
+
+const body = Inter({
+  subsets: ["vietnamese", "latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+});
+
 const stats = [
-  { value: "2018", label: "Thành lập tại TP. Hồ Chí Minh" },
-  { value: "5K+", label: "Người chơi đã được FlyShot phục vụ" },
-  { value: "42", label: "Bước kiểm tra khung và dây" },
+  { value: "2018", label: "Năm thành lập" },
+  { value: "5.000+", label: "Người chơi đã phục vụ" },
+  { value: "42", label: "Bước kiểm tra vợt & dây" },
+];
+
+const timeline = [
+  {
+    year: "2018",
+    title: "Khởi đầu từ một sân tập nhỏ",
+    description:
+      "FlyShot ra đời tại TP. Hồ Chí Minh từ nhu cầu rất thật: người chơi phong trào khó tìm được vợt đúng lối chơi và nơi căng dây đáng tin cậy.",
+  },
+  {
+    year: "2020",
+    title: "Mở phòng kỹ thuật riêng",
+    description:
+      "Đầu tư máy căng dây điện tử và quy trình kiểm tra khung vợt 42 bước, giảm sai số căng dây xuống dưới 0.5kg.",
+  },
+  {
+    year: "2022",
+    title: "Hợp tác nhà phân phối chính hãng",
+    description:
+      "Trở thành điểm bán được ủy quyền của nhiều thương hiệu vợt lớn, đảm bảo nguồn hàng chính hãng và bảo hành đầy đủ.",
+  },
+  {
+    year: "Hiện tại",
+    title: "Đồng hành cùng hơn 5.000 người chơi",
+    description:
+      "Từ người mới bắt đầu đến vận động viên phong trào thi đấu, mỗi tư vấn vẫn giữ nguyên một nguyên tắc: đúng người, đúng vợt.",
+  },
 ];
 
 const principles = [
   {
-    title: "Tốc độ vung vợt nhanh hơn",
-    description: "Khung khí động học và điểm cân bằng nhẹ giúp người chơi xử lý các pha cầu cuối trận với ít lực cản hơn.",
+    title: "Tư vấn theo lối chơi thật",
+    description:
+      "Không bán theo trào lưu. Vợt được chọn dựa trên tốc độ vung, điểm tiếp xúc và cách bạn di chuyển trên sân.",
   },
   {
-    title: "Cấu hình đúng lối chơi",
-    description: "Mỗi tư vấn đều kết hợp trọng lượng vợt, lực căng dây, cỡ cán và phong cách di chuyển của bạn.",
+    title: "Minh bạch về thông số",
+    description:
+      "Trọng lượng, điểm cân bằng, độ cứng trục — mọi thông số kỹ thuật đều được giải thích rõ trước khi bạn quyết định.",
   },
   {
-    title: "Chăm sóc sẵn sàng ra sân",
-    description: "Căng dây, kiểm tra gen vợt và bảo hành luôn bám sát cách người chơi thật sự tập luyện.",
+    title: "Đồng hành sau khi mua",
+    description:
+      "Căng lại dây, kiểm tra định kỳ hoặc đổi cấu hình khi lối chơi của bạn thay đổi — chúng tôi vẫn ở đó.",
   },
 ];
 
@@ -28,67 +79,182 @@ const services = [
   {
     icon: SlidersHorizontal,
     title: "Căng dây theo cá nhân",
-    description: "Chúng tôi tinh chỉnh lực căng theo tốc độ vung vợt, điểm tiếp xúc và cảm giác cầu bạn mong muốn.",
+    description: "Lực căng được tinh chỉnh theo tốc độ vung vợt và cảm giác cầu bạn muốn có.",
   },
   {
     icon: Gauge,
-    title: "Thử vợt hiệu năng",
-    description: "Một số mẫu vợt có thể được trải nghiệm trước khi mua để lựa chọn cuối cùng thật chắc chắn trên sân.",
+    title: "Thử vợt trước khi mua",
+    description: "Trải nghiệm thực tế trên sân trước khi đưa ra lựa chọn cuối cùng.",
   },
   {
     icon: ShieldCheck,
-    title: "Mua sắm được bảo vệ",
-    description: "Chính sách đổi trả, bảo hành và kiểm định rõ ràng giúp thiết bị cao cấp dễ sở hữu hơn.",
+    title: "Bảo hành rõ ràng",
+    description: "Chính sách đổi trả và kiểm định minh bạch cho từng sản phẩm.",
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "Mình từng đổi 3 cây vợt vì không hợp tay. Sau khi được FlyShot tư vấn theo tốc độ vung, cây vợt hiện tại là cây mình gắn bó lâu nhất.",
+    name: "Minh Anh",
+    role: "Người chơi phong trào, 4 năm",
+  },
+  {
+    quote:
+      "Đội ngũ giải thích thông số rất dễ hiểu, không ép mua vợt đắt tiền. Căng dây đúng như yêu cầu, cảm giác cầu ổn định qua nhiều buổi tập.",
+    name: "Quốc Bảo",
+    role: "Thành viên CLB cầu lông quận 7",
+  },
+];
+
+const faqs = [
+  {
+    question: "FlyShot có tư vấn cho người mới chơi không?",
+    answer:
+      "Có. Phần lớn khách hàng của FlyShot là người chơi phong trào. Chúng tôi bắt đầu từ mục tiêu và thể trạng của bạn trước khi nói đến thông số vợt.",
+  },
+  {
+    question: "Có thể thử vợt trước khi mua không?",
+    answer:
+      "Một số mẫu vợt trong kho có thể mượn thử trên sân theo lịch hẹn trước, giúp bạn chắc chắn hơn về cảm giác cầm và tiếp cầu.",
+  },
+  {
+    question: "Thời gian căng dây mất bao lâu?",
+    answer:
+      "Thông thường 30–45 phút với máy căng dây điện tử. Bạn có thể chờ lấy ngay hoặc gửi vợt và quay lại sau.",
+  },
+  {
+    question: "Chính sách bảo hành áp dụng như thế nào?",
+    answer:
+      "Vợt chính hãng được bảo hành theo tiêu chuẩn của nhà sản xuất. FlyShot hỗ trợ toàn bộ thủ tục bảo hành và kiểm tra khung định kỳ miễn phí.",
   },
 ];
 
 export default function AboutPage() {
   return (
     <MainLayout>
-      <div className="mx-auto w-full max-w-7xl text-[#061017]">
-        <section className="grid min-h-[calc(100dvh-120px)] grid-cols-1 items-center gap-8 py-10 lg:grid-cols-[1.02fr_0.98fr] lg:py-14">
-          <div className="max-w-2xl">
-            <p className="mb-5 text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
-              Nhà hiệu năng FlyShot
+      <div className={`${body.className} mx-auto w-full max-w-6xl px-4 text-[#0B1220] sm:px-6`}>
+        
+        {/* 1. HERO SECTION */}
+        <section className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-7">
+            <p className="text-xl font-black tracking-[0.2em] text-emerald-600">
+              Về FlyShot
             </p>
-            <h1 className="text-5xl font-black leading-[0.92] tracking-[-0.06em] text-[#061017] sm:text-6xl lg:text-7xl">
-              Dành cho người chơi cảm được nhịp cầu sớm hơn.
+            <h1
+              className={`${display.className} mt-4 text-4xl font-extrabold leading-[1.1] tracking-tight text-[#0B1220] sm:text-5xl lg:text-[3.5rem]`}
+            >
+              Thiết bị cầu lông cho người chơi nghiêm túc.
             </h1>
             <p className="mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg">
-              FlyShot tuyển chọn thiết bị cầu lông cao cấp cho người chơi đề cao tốc độ, độ chính xác và cảm giác của một cú chạm cầu gọn gàng.
+              FlyShot tuyển chọn vợt, dây và phụ kiện cao cấp — ưu tiên tốc độ,
+              độ chính xác và cảm giác chạm cầu thật gọn gàng. Mỗi cây vợt rời
+              cửa hàng đều đã qua tư vấn theo đúng lối chơi của bạn, không phải
+              theo trào lưu.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+
+            <div className="mt-10 flex flex-wrap gap-4">
               <Link
                 href="/shop"
-                className="inline-flex h-12 items-center justify-center rounded-full bg-[#061017] px-6 text-sm font-bold text-white transition-all duration-200 hover:bg-[#12202c] active:translate-y-px"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-[#0B1220] px-7 text-sm font-semibold tracking-wide text-white transition-all hover:bg-[#1a2b3a] shadow-sm"
               >
-                Mua thiết bị hiệu năng
+                Mua sắm ngay
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-bold text-[#061017] transition-all duration-200 hover:border-[#061017] active:translate-y-px"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 px-7 text-sm font-semibold tracking-wide text-[#0B1220] transition-all hover:border-[#0B1220]"
               >
                 Đặt lịch tư vấn
               </Link>
             </div>
           </div>
 
-          <div className="relative min-h-[420px] overflow-hidden rounded-[28px] border border-white/70 bg-[#061017] shadow-[0_28px_80px_rgba(6,16,23,0.22)]">
-            <Image
-              src="/assets/images/banner-flyshot01.png"
-              alt="Người chơi cầu lông FlyShot và thiết bị cao cấp"
-              fill
-              sizes="(min-width: 1024px) 46vw, 100vw"
-              className="object-cover"
-              priority
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-[#061017]/82 via-[#061017]/18 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-              <div className="grid grid-cols-3 gap-3 rounded-3xl border border-white/14 bg-white/10 p-3 text-white backdrop-blur-xl">
-                {stats.map((stat) => (
-                  <div key={stat.value} className="rounded-2xl bg-white/10 p-3">
-                    <div className="text-2xl font-black tracking-[-0.04em]">{stat.value}</div>
-                    <div className="mt-1 text-[11px] font-medium leading-4 text-white/68">{stat.label}</div>
+          <div className="lg:col-span-5">
+            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-md">
+              <Image
+                src="/assets/images/banner-flyshot01.png"
+                alt="Người chơi cầu lông FlyShot và thiết bị cao cấp"
+                fill
+                sizes="(min-width: 1024px) 40vw, 100vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* 3. STORY & TIMELINE */}
+        <section className="py-16 lg:py-24">
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-4 lg:sticky lg:top-8 lg:h-fit">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+                Hành trình
+              </p>
+              <h2 className={`${display.className} mt-4 text-3xl font-bold leading-[1.2] tracking-tight text-[#0B1220] sm:text-4xl`}>
+                Từ một sân tập nhỏ đến điểm đến của người chơi.
+              </h2>
+              <p className="mt-4 text-sm leading-6 text-slate-600">
+                Chúng tôi không ngừng cải tiến để mang lại giá trị kỹ thuật chính xác nhất cho từng cú đánh của bạn.
+              </p>
+            </div>
+
+            <div className="space-y-10 lg:col-span-8 border-l border-slate-200 pl-6 lg:pl-10 ml-2">
+              {timeline.map((item) => (
+                <div key={item.year} className="relative group">
+                  <div className="absolute -left-[31px] lg:-left-[47px] top-1.5 h-3 w-3 rounded-full border-2 border-emerald-600 bg-white transition-colors group-hover:bg-emerald-600" />
+                  <div className={`${display.className} text-sm font-bold tracking-wide text-emerald-600`}>
+                    {item.year}
+                  </div>
+                  <h3 className={`${display.className} mt-2 text-lg font-bold text-[#0B1220]`}>
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-base leading-7 text-slate-600">
+                    {item.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 4. PRINCIPLES & FEATURE IMAGE */}
+        <section className="border-t border-slate-200 py-16 lg:py-24">
+          <div className="grid grid-cols-1 gap-12 items-center lg:grid-cols-12 lg:gap-16">
+            <div className="lg:col-span-5">
+              <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100 shadow-sm">
+                <Image
+                  src="/assets/images/badmintonimage1.png"
+                  alt="Chi tiết vợt cầu lông được FlyShot tuyển chọn"
+                  fill
+                  sizes="(min-width: 1024px) 42vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-7">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+                Triết lý vận hành
+              </p>
+              <h2 className={`${display.className} mt-3 text-3xl font-bold leading-tight text-[#0B1220] sm:text-4xl`}>
+                Cao cấp không phải là xa cách. Cao cấp là chính xác.
+              </h2>
+              
+              <div className="mt-10 space-y-6">
+                {principles.map((principle, index) => (
+                  <div key={principle.title} className="flex gap-4 p-4 rounded-xl bg-slate-50/70 border border-slate-100">
+                    <div className={`${display.className} text-base font-bold text-emerald-600 shrink-0 mt-0.5`}>
+                      0{index + 1}.
+                    </div>
+                    <div>
+                      <h3 className={`${display.className} text-base font-bold text-[#0B1220]`}>
+                        {principle.title}
+                      </h3>
+                      <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                        {principle.description}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -96,109 +262,148 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section className="border-y border-slate-200 py-10 lg:py-14">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[0.7fr_1.3fr]">
-            <div>
-              <h2 className="text-3xl font-black tracking-[-0.04em] text-[#061017] sm:text-4xl">
-                Chúng tôi thiết kế trải nghiệm mua sắm quanh từng pha cầu.
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-              {principles.map((principle) => (
-                <div key={principle.title} className="border-l border-slate-200 pl-5">
-                  <h3 className="text-base font-black text-[#061017]">{principle.title}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{principle.description}</p>
+        {/* 5. SERVICES */}
+        <section className="border-t border-slate-200 py-16 lg:py-24">
+          <div className="text-center max-w-xl mx-auto mb-12">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Giá trị gia tăng</p>
+            <h2 className={`${display.className} mt-3 text-3xl font-bold tracking-tight text-[#0B1220]`}>
+              Dịch vụ tiêu chuẩn cao
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            {services.map((service) => {
+              const Icon = service.icon;
+              return (
+                <div key={service.title} className="p-6 rounded-2xl border border-slate-300 bg-white transition-all">
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl w-fit">
+                    <Icon className="h-6 w-6" strokeWidth={1.8} />
+                  </div>
+                  <h3 className={`${display.className} mt-5 text-base font-bold text-[#0B1220]`}>
+                    {service.title}
+                  </h3>
+                  <p className="mt-2.5 text-sm leading-6 text-slate-600">
+                    {service.description}
+                  </p>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-8 py-12 lg:grid-cols-[0.9fr_1.1fr] lg:py-16">
-          <div className="relative min-h-[360px] overflow-hidden rounded-[28px] bg-slate-200">
-            <Image
-              src="/assets/images/badmintonimage1.png"
-              alt="Chi tiết vợt cầu lông được FlyShot tuyển chọn"
-              fill
-              sizes="(min-width: 1024px) 42vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-
-          <div className="flex flex-col justify-center">
-            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-800">
-              <Sparkles className="h-5 w-5" strokeWidth={1.8} />
-            </div>
-            <h2 className="max-w-xl text-4xl font-black leading-[0.98] tracking-[-0.05em] text-[#061017] sm:text-5xl">
-              Cao cấp không phải là xa cách. Cao cấp là chính xác.
+        {/* 6. TESTIMONIALS */}
+        <section className="border-t border-slate-300 py-16 lg:py-24 bg-slate-50/50 -mx-4 px-4 sm:-mx-6 sm:px-6 rounded-3xl">
+          <div className="max-w-6xl mx-auto">
+            <h2 className={`${display.className} text-center text-2xl font-bold tracking-tight text-[#0B1220] sm:text-3xl mb-12`}>
+              Đồng hành cùng cộng đồng người chơi
             </h2>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600">
-              Đội ngũ của chúng tôi kết hợp kiến thức sản phẩm với trải nghiệm trên sân. Chúng tôi tìm hiểu cách bạn phòng thủ, hồi vị và mất nhịp ở đâu, rồi thu hẹp lựa chọn vào những thiết bị cải thiện đúng các khoảnh khắc đó.
-            </p>
-
-            <div className="mt-8 space-y-4">
-              {services.map((service) => {
-                const Icon = service.icon;
-
-                return (
-                  <div key={service.title} className="flex gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.05)]">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#061017] text-white">
-                      <Icon className="h-5 w-5" strokeWidth={1.8} />
-                    </div>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+              {testimonials.map((testimonial) => (
+                <div key={testimonial.name} className="flex flex-col justify-between p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                  <div>
+                    <Quote className="h-6 w-6 text-emerald-600/30 transform rotate-180" strokeWidth={2} />
+                    <p className="mt-4 text-base leading-7 text-slate-700 italic">
+                      {testimonial.quote}
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
                     <div>
-                      <h3 className="font-black text-[#061017]">{service.title}</h3>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{service.description}</p>
+                      <div className={`${display.className} text-sm font-bold text-[#0B1220]`}>
+                        {testimonial.name}
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">{testimonial.role}</div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        <section className="overflow-hidden rounded-[28px] bg-[#061017] text-white">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="p-7 sm:p-10 lg:p-12">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-300">
-                Tiêu chuẩn FlyShot
-              </p>
-              <h2 className="mt-5 max-w-2xl text-4xl font-black leading-[0.98] tracking-[-0.05em] sm:text-5xl">
-                Thiết bị được tuyển chọn với kỷ luật của một buổi chuẩn bị thi đấu.
-              </h2>
-              <p className="mt-6 max-w-2xl text-base leading-7 text-white/68">
-                Từ tư vấn ban đầu đến hỗ trợ sau bán hàng, mỗi bước đều được xây dựng để giảm phỏng đoán và giúp người chơi tập trung vào di chuyển, thời điểm ra vợt và khả năng kiểm soát.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 border-t border-white/10 lg:border-l lg:border-t-0">
-              {["Nguồn hàng chính hãng", "Tư vấn kỹ thuật theo lối chơi", "Hỗ trợ địa phương nhanh"].map((item) => (
-                <div key={item} className="flex items-center border-b border-white/10 px-7 py-6 last:border-b-0 sm:px-10">
-                  <span className="mr-4 h-2 w-2 rounded-full bg-emerald-300" />
-                  <span className="text-sm font-bold text-white/86">{item}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="py-12 text-center lg:py-16">
-          <h2 className="mx-auto max-w-2xl text-4xl font-black leading-[1] tracking-[-0.05em] text-[#061017] sm:text-5xl">
-            Tìm cấu hình khiến cú đánh tiếp theo của bạn trở nên chắc chắn hơn.
+        {/* 7. FAQ */}
+        <section className="border-t border-slate-200 py-16 lg:py-24 max-w-3xl mx-auto">
+          <h2 className={`${display.className} text-center text-2xl font-bold tracking-tight text-[#0B1220] sm:text-3xl mb-8`}>
+            Giải đáp thắc mắc
           </h2>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="divide-y divide-slate-200 border-y border-slate-200">
+            {faqs.map((faq) => (
+              <details key={faq.question} className="group py-5">
+                <summary className={`${display.className} flex cursor-pointer list-none items-center justify-between text-base font-semibold text-[#0B1220] hover:text-emerald-600 transition-colors`}>
+                  <span>{faq.question}</span>
+                  <span className="ml-4 shrink-0 text-xl text-slate-400 transition-transform duration-200 group-open:rotate-45">
+                    +
+                  </span>
+                </summary>
+                <p className="mt-3 text-sm leading-6 text-slate-600 pl-1">
+                  {faq.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* 8. VISIT STORE CARD */}
+        <section className="py-6">
+          <div className="bg-gradient-to-br from-[#0B1220] via-[#0F172A] to-[#0A221D] rounded-2xl p-8 sm:p-12 shadow-xl grid grid-cols-1 gap-8 md:grid-cols-12 md:items-centerbg-gradient-to-br from-slate-50 via-slate-100 to-emerald-50/30 text-slate-900 rounded-2xl p-8 sm:p-12 shadow-md border border-slate-200/60 grid grid-cols-1 gap-8 md:grid-cols-12 md:items-center">
+            <div className="md:col-span-7">
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">Trải nghiệm thực tế</span>
+              <h2 className={`${display.className} text-2xl font-bold tracking-tight sm:text-3xl mt-2`}>
+                Ghé cửa hàng để thử vợt trực tiếp
+              </h2>
+              <p className="mt-3 max-w-md text-sm text-gray-600 leading-relaxed">
+                Trải nghiệm cảm giác cầm vợt thực tế và nhận tư vấn đo thông số trực tiếp từ đội ngũ kỹ thuật lành nghề của FlyShot.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-6 inline-flex h-11 items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-semibold tracking-wide text-[#0B1220] transition-colors hover:bg-emerald-400"
+              >
+                Xem chỉ đường <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </div>
+            
+            <div className="space-y-4 md:col-span-5 border-t border-slate-700/60 pt-6 md:border-t-0 md:border-l md:border-slate-700/60 md:pt-0 md:pl-8">
+              <div className="flex gap-4">
+                <MapPin className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" strokeWidth={2} />
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Địa chỉ</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Số 12, Đường ABC, Quận 7, TP. Hồ Chí Minh
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <Clock className="h-5 w-5 shrink-0 text-emerald-400 mt-0.5" strokeWidth={2} />
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Giờ hoạt động</h4>
+                  <p className="text-sm text-gray-600 mt-1">
+                    9:00 – 21:00, tất cả các ngày trong tuần
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 9. FINAL CTA */}
+        <section className="py-16 text-center lg:py-24">
+          <h2 className={`${display.className} mx-auto max-w-2xl text-2xl font-bold leading-tight text-[#0B1220] sm:text-4xl`}>
+            Tìm cấu hình phù hợp cho cú đánh tiếp theo của bạn.
+          </h2>
+          <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link
               href="/shop"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-500 px-6 text-sm font-black text-[#061017] transition-all duration-200 hover:bg-emerald-400 active:translate-y-px"
+              className="inline-flex h-12 items-center justify-center rounded-full bg-emerald-600 px-7 text-sm font-semibold tracking-wide text-white transition-all hover:bg-emerald-500 shadow-md"
             >
               Khám phá FlyShot
             </Link>
             <Link
               href="/contact"
-              className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 bg-white px-6 text-sm font-black text-[#061017] transition-all duration-200 hover:border-[#061017] active:translate-y-px"
+              className="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 px-7 text-sm font-semibold tracking-wide text-[#0B1220] transition-all hover:border-[#0B1220]"
             >
               Trao đổi với chuyên viên
             </Link>
           </div>
         </section>
+
       </div>
     </MainLayout>
   );

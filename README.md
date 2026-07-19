@@ -1,17 +1,92 @@
 RUN PROJECT
 Project structure hiện tại:
 ```
-d:\badminton-shop
-├─ api/
-│  └─ MyAPI/
-│     └─ MyAPI/
-│        ├─ Controllers/
-│        ├─ Program.cs
-│        ├─ MyAPI.csproj
-│        └─ Properties/
-├─ database/
-├─ frontend/
-└─ docker-compose.yml
+MyAPI
+│
+├── Application
+│   │
+│   ├── Common
+│   │   ├── Constants
+│   │   ├── Exceptions
+│   │   ├── Helpers
+│   │   ├── Models
+│   │   │   ├── ApiResponse.cs
+│   │   │   ├── ServiceResult.cs
+│   │   │   └── PagedResult.cs
+│   │   └── Mapping
+│   │
+│   ├── DTOs
+│   │
+│   ├── Interfaces
+│   │   ├── Admin
+│   │   ├── Auth
+│   │   ├── Catalog
+│   │   ├── Customer
+│   │   ├── Order
+│   │   └── Store
+│   │
+│   ├── Services
+│   │   ├── Admin
+│   │   ├── Auth
+│   │   ├── Catalog
+│   │   ├── Customer
+│   │   ├── Order
+│   │   └── Store
+│   │
+│   ├── Validators
+│   │
+│   └── Mappings
+│       ├── ProductProfile.cs
+│       ├── OrderProfile.cs
+│       ├── UserProfile.cs
+│       └── StoreProfile.cs
+│
+├── Controllers
+│
+├── Domain
+│   ├── Entities
+│   ├── Enums
+│   ├── Constants
+│   ├── Exceptions
+│   ├── Events
+│   ├── ValueObjects
+│   └── Interfaces
+│
+├── Infrastructure
+│   ├── Persistence
+│   │   ├── Configurations
+│   │   ├── DbContext
+│   │   ├── Seed
+│   │   └── Repositories
+│   │
+│   ├── Identity
+│   │
+│   ├── Authentication
+│   │
+│   ├── Authorization
+│   │
+│   ├── Storage
+│   │
+│   ├── Email
+│   │
+│   ├── Payments
+│   │   ├── PayOS
+│   │   └── VNPay
+│   │
+│   └── DependencyInjection.cs
+│
+├── Extensions
+│
+├── Middleware
+│
+├── Migrations
+│
+├── Properties
+│
+├── wwwroot
+│
+├── Program.cs
+└── appsettings.json
 ```
 1. Mở database
     Nếu bạn dùng MySQL local trên máy: chỉ cần đảm bảo service MySQL đang chạy.

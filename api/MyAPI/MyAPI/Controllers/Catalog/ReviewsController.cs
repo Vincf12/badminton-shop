@@ -1,11 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Application.DTOs;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 using System.Security.Claims;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Catalog
 {
     [ApiController]
     public class ReviewsController : ControllerBase
@@ -52,7 +49,7 @@ namespace MyAPI.Controllers
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _reviewService.CreateReviewAsync(productId, userId, dto);
@@ -65,7 +62,7 @@ namespace MyAPI.Controllers
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _reviewService.UpdateReviewAsync(id, userId, dto);
@@ -78,7 +75,7 @@ namespace MyAPI.Controllers
         {
             if (!TryGetCurrentUserId(out int userId))
             {
-                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _reviewService.DeleteReviewAsync(id, userId, User.IsInRole("admin"));
@@ -86,3 +83,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

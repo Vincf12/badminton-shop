@@ -1,8 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Services.Interfaces;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Admin
 {
     [Route("api/dashboard")]
     [ApiController]
@@ -53,3 +52,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

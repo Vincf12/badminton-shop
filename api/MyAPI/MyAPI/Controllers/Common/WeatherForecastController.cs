@@ -1,6 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Common
 {
     [ApiController]
     [Route("[controller]")]
@@ -24,3 +24,4 @@ namespace MyAPI.Controllers
         }
     }
 }
+

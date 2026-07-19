@@ -1,21 +1,24 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using MyAPI.Infrastructure.Persistence;
-using MyAPI.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IO;
 
-// Dung alias SwaggerModels de tranh trung ten voi cac model OpenAPI.
+// DÃ¹ng alias SwaggerModels Ä‘á»ƒ trÃ¡nh trÃ¹ng tÃªn vá»›i cÃ¡c model OpenAPI.
 using SwaggerModels = Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// =========================================================================
+// KHU Vá»°C 1: ÄÄ‚NG KÃ CÃC Cáº¤U HÃŒNH & SERVICES (DEPENDENCY INJECTION)
+// Táº¥t cáº£ builder.Services.Add... Báº®T BUá»˜C pháº£i náº±m trong khu vá»±c nÃ y.
+// =========================================================================
 
 builder.Services.AddApplicationServices();
 
+#region Äá»c file mÃ´i trÆ°á»ng .env á»Ÿ local (Development)
 // In development, load the repo root .env for local runs only.
 // When the API runs in Docker, compose-provided environment variables must win.
 var runningInContainer = string.Equals(Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER"), "true", StringComparison.OrdinalIgnoreCase);
@@ -52,11 +55,12 @@ if (builder.Environment.IsDevelopment() && !runningInContainer)
         builder.Configuration.AddInMemoryCollection(envValues);
     }
 }
+#endregion
 
-// Add services to the container.
+// ÄÄƒng kÃ½ Controllers
 builder.Services.AddControllers();
 
-// Allow CORS from frontend during development to avoid "Failed to fetch" in browser
+// Cáº¥u hÃ¬nh CORS cho mÃ´i trÆ°á»ng Development
 if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddCors(options =>
@@ -70,7 +74,7 @@ if (builder.Environment.IsDevelopment())
     });
 }
 
-// Cấu hình Kết nối Database MySQL
+#region Cáº¥u hÃ¬nh Káº¿t ná»‘i Database MySQL
 if (builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration.GetConnectionString("DefaultConnection")))
 {
     var dbHost = builder.Configuration["MYSQL_HOST"] ?? "localhost";
@@ -98,8 +102,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 0))
     );
 });
+#endregion
 
-// Cấu hình Xác thực JWT Authentication
+#region Cáº¥u hÃ¬nh XÃ¡c thá»±c JWT Authentication
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "MyAPI";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "MyAPIClient";
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -126,11 +131,12 @@ builder.Services.AddAuthentication(options =>
         )
     };
 });
+#endregion
 
-// Thêm dịch vụ Cấp quyền
+// ThÃªm dá»‹ch vá»¥ Cáº¥p quyá»n (Authorization)
 builder.Services.AddAuthorization();
 
-// --- Cấu hình Swagger UI (Đã sửa dùng Alias SwaggerModels) ---
+#region Cáº¥u hÃ¬nh Swagger UI (Sá»­ dá»¥ng Alias SwaggerModels)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -140,7 +146,7 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1"
     });
 
-    // Cấu hình nút khóa Bearer Token
+    // Cáº¥u hÃ¬nh nÃºt khÃ³a Bearer Token
     options.AddSecurityDefinition("Bearer", new SwaggerModels.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -148,10 +154,10 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = SwaggerModels.ParameterLocation.Header,
-        Description = "Nhập trực tiếp chuỗi Token vào đây (Không gõ thêm chữ Bearer)."
+        Description = "Nháº­p trá»±c tiáº¿p chuá»—i Token vÃ o Ä‘Ã¢y (KhÃ´ng gÃµ thÃªm chá»¯ Bearer)."
     });
 
-    // Áp dụng yêu cầu Token cho các API có thuộc tính [Authorize]
+    // Ãp dá»¥ng yÃªu cáº§u Token cho cÃ¡c API cÃ³ thuá»™c tÃ­nh [Authorize]
     options.AddSecurityRequirement(new SwaggerModels.OpenApiSecurityRequirement
     {
         {
@@ -167,30 +173,38 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+#endregion
 
-// Cấu hình tránh cảnh báo HTTPS ở local
+// Cáº¥u hÃ¬nh trÃ¡nh cáº£nh bÃ¡o HTTPS á»Ÿ local
 builder.Services.Configure<Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionOptions>(options =>
 {
     options.HttpsPort = 7115;
 });
 
+// [ÄÃƒ Sá»¬A]: Chuyá»ƒn dÃ²ng nÃ y tá»« dÆ°á»›i lÃªn trÃªn builder.Build() Ä‘á»ƒ trÃ¡nh lá»—i Read-Only
+builder.Services.AddScoped<IStoreService, StoreService>();
+
+
+// =========================================================================
+// KHU Vá»°C 2: BUILD á»¨NG Dá»¤NG & Cáº¤U HÃŒNH HTTP REQUEST PIPELINE (MIDDLEWARE)
+// =========================================================================
+
+// KhÃ³a Services Collection, khá»Ÿi táº¡o á»©ng dá»¥ng
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Cáº¥u hÃ¬nh Swagger cho mÃ´i trÆ°á»ng Development
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        // Đường dẫn chuẩn xác để tránh lỗi Failed to fetch
+        // ÄÆ°á»ng dáº«n chuáº©n xÃ¡c Ä‘á»ƒ trÃ¡nh lá»—i Failed to fetch
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "MyAPI v1");
         options.RoutePrefix = "swagger";
     });
 }
 
-// Only redirect to HTTPS in non-development environments to avoid
-// HTTP -> HTTPS 307 redirects during local testing (which can cause
-// Swagger UI "Failed to fetch" or mixed-content issues).
+// Chá»‰ redirect HTTPS ngoÃ i mÃ´i trÆ°á»ng dev Ä‘á»ƒ trÃ¡nh lá»—i Swagger local
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
@@ -198,14 +212,16 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 
-// Enable CORS only in development
+// Báº­t CORS cho mÃ´i trÆ°á»ng Development
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("DevCors");
 }
 
-app.UseAuthentication(); // 1. Bạn là ai?
-app.UseAuthorization();  // 2. Bạn được làm gì?
+app.UseAuthentication(); // 1. Báº¡n lÃ  ai? (XÃ¡c thá»±c JWT)
+app.UseAuthorization();  // 2. Báº¡n Ä‘Æ°á»£c lÃ m gÃ¬? (PhÃ¢n quyá»n)
 
 app.MapControllers();
+
+// Khá»Ÿi cháº¡y á»©ng dá»¥ng
 app.Run();

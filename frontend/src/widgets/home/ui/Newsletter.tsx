@@ -21,7 +21,7 @@ export default function Newsletter() {
           </h2>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex min-h-12 flex-1 items-center gap-3 rounded-full border border-white bg-white px-4 text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.05)] focus-within:border-emerald-400 focus-within:ring-4 focus-within:ring-emerald-100">
+          <label className="flex min-h-12 flex-1 items-center gap-3 rounded-full border border-white focus-within:border-gray-400 bg-white px-4 text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.05)]">
             <Mail className="h-4 w-4" strokeWidth={1.8} />
             <input
               type="email"

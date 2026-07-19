@@ -1,12 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Application.DTOs;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Admin
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     [Authorize(Roles = "admin")]
     public class UserController : ControllerBase
@@ -64,3 +61,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

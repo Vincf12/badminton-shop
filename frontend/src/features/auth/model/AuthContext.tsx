@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService, type User } from "../api/authService";
+import { cartService } from "@/features/cart";
 
 interface AuthContextType {
   user: User | null;
@@ -44,6 +45,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await authService.login({ email: contactInfo, password });
       authService.setToken(response.access_token);
+      await cartService.syncGuestCartToServer();
       const userData = await authService.getCurrentUser(response.access_token);
       setUser(userData);
       return userData;

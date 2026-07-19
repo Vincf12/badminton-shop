@@ -1,11 +1,8 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Application.DTOs;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Auth
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -34,37 +31,6 @@ namespace MyAPI.Controllers
             return ToActionResult(result);
         }
 
-        [HttpGet("me")]
-        [Authorize]
-        public async Task<IActionResult> Me()
-        {
-            if (!TryGetCurrentUserId(out var userId))
-            {
-                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
-            }
-
-            var result = await _accountService.GetCurrentUserAsync(userId);
-            return ToActionResult(result);
-        }
-
-        [HttpPut("change-password")]
-        [Authorize]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (!TryGetCurrentUserId(out var userId))
-            {
-                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
-            }
-
-            var result = await _accountService.ChangePasswordAsync(userId, dto);
-            return ToActionResult(result);
-        }
-
         [HttpPost("logout")]
         public IActionResult Logout()
         {
@@ -88,3 +54,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

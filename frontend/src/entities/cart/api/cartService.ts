@@ -7,6 +7,27 @@ import {
 import { getAccessToken } from "@/shared/api/authSession";
 
 const FALLBACK_IMAGE = FALLBACK_PRODUCT_IMAGE;
+const GUEST_CART_KEY = "guest_cart_items";
+
+interface VariantDto {
+  variantId: number;
+  productId: number;
+  sku: string;
+  weight?: string | null;
+  gripSize?: string | null;
+  color?: string | null;
+  price: number;
+  stockQuantity: number;
+  imageUrl?: string | null;
+}
+
+interface ProductDto {
+  productId: number;
+  productName: string;
+  imageUrl?: string | null;
+}
+
+type GuestCartItem = CartItemModel;
 
 async function readErrorMessage(response: Response, fallback: string): Promise<string> {
   const contentType = response.headers.get("content-type") ?? "";
@@ -23,11 +44,11 @@ async function readErrorMessage(response: Response, fallback: string): Promise<s
   }
 }
 
-function getAuthHeaders(): HeadersInit {
+function getAuthHeaders(): HeadersInit | null {
   const token = getAccessToken();
 
   if (!token) {
-    throw new Error("Vui lòng đăng nhập để sử dụng giỏ hàng");
+    return null;
   }
 
   return {
@@ -50,6 +71,29 @@ function normalizeImage(imageUrl?: string | null): string {
   }
 
   return `${API_ORIGIN_URL}/${imageUrl.replace(/^\/+/, "")}`;
+}
+
+function dispatchCartUpdated() {
+  window.dispatchEvent(new Event("cart-updated"));
+}
+
+function readGuestItems(): GuestCartItem[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+
+  try {
+    const raw = sessionStorage.getItem(GUEST_CART_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeGuestItems(items: GuestCartItem[]) {
+  sessionStorage.setItem(GUEST_CART_KEY, JSON.stringify(items));
+  dispatchCartUpdated();
 }
 
 function mapCartItem(item: CartItemDto): CartItemModel {
@@ -81,18 +125,48 @@ function mapCart(cart: CartDto): CartModel {
   };
 }
 
+function mapGuestCart(items: GuestCartItem[]): CartModel {
+  return {
+    id: 0,
+    items,
+    totalAmount: items.reduce((sum, item) => sum + item.subTotal, 0),
+    totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+  };
+}
+
+async function publicRequestJson<T>(path: string): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response, "Khong the tai du lieu san pham"));
+  }
+
+  return response.json() as Promise<T>;
+}
+
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = getAuthHeaders();
+
+  if (!headers) {
+    throw new Error("Vui long dang nhap de su dung gio hang tren tai khoan");
+  }
+
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
     headers: {
-      ...getAuthHeaders(),
+      ...headers,
       ...(init?.headers ?? {}),
     },
     cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error(await readErrorMessage(response, "Không thể cập nhật giỏ hàng"));
+    throw new Error(await readErrorMessage(response, "Khong the cap nhat gio hang"));
   }
 
   if (response.status === 204) {
@@ -102,8 +176,33 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function createGuestItem(variantId: number, quantity: number): Promise<GuestCartItem> {
+  const variant = await publicRequestJson<VariantDto>(`/product-variants/${variantId}`);
+  const product = await publicRequestJson<ProductDto>(`/products/${variant.productId}`);
+  const variantParts = [variant.weight, variant.gripSize, variant.color].filter(Boolean);
+  const safeQuantity = Math.max(1, Math.min(quantity, variant.stockQuantity));
+
+  return {
+    id: variant.variantId,
+    variantId: variant.variantId,
+    productId: variant.productId,
+    name: product.productName,
+    image: normalizeImage(variant.imageUrl ?? product.imageUrl),
+    sku: variant.sku,
+    variantLabel: variantParts.length > 0 ? variantParts.join(" / ") : variant.sku,
+    price: variant.price,
+    quantity: safeQuantity,
+    stock: variant.stockQuantity,
+    subTotal: variant.price * safeQuantity,
+  };
+}
+
 export const cartService = {
   async getCart(): Promise<CartModel> {
+    if (!getAccessToken()) {
+      return mapGuestCart(readGuestItems());
+    }
+
     const cart = await requestJson<CartDto>("/cart");
     return mapCart(cart);
   },
@@ -114,34 +213,92 @@ export const cartService = {
   },
 
   async addItem(variantId: number, quantity: number): Promise<void> {
+    if (!getAccessToken()) {
+      const items = readGuestItems();
+      const existing = items.find((item) => item.variantId === variantId);
+
+      if (existing) {
+        const nextQuantity = Math.min(existing.stock, existing.quantity + quantity);
+        writeGuestItems(items.map((item) =>
+          item.variantId === variantId
+            ? { ...item, quantity: nextQuantity, subTotal: nextQuantity * item.price }
+            : item
+        ));
+        return;
+      }
+
+      writeGuestItems([...items, await createGuestItem(variantId, quantity)]);
+      return;
+    }
+
     await requestJson("/cart/items", {
       method: "POST",
       body: JSON.stringify({ variantId, quantity }),
     });
 
-    window.dispatchEvent(new Event("cart-updated"));
+    dispatchCartUpdated();
   },
 
   async updateItemQuantity(cartItemId: number, quantity: number): Promise<void> {
+    if (!getAccessToken()) {
+      const items = readGuestItems();
+      writeGuestItems(items.map((item) => {
+        if (item.id !== cartItemId) return item;
+        const nextQuantity = Math.max(1, Math.min(quantity, item.stock));
+        return { ...item, quantity: nextQuantity, subTotal: nextQuantity * item.price };
+      }));
+      return;
+    }
+
     await requestJson(`/cart/items/${cartItemId}`, {
       method: "PUT",
       body: JSON.stringify({ quantity }),
     });
 
-    window.dispatchEvent(new Event("cart-updated"));
+    dispatchCartUpdated();
   },
 
   async deleteItem(cartItemId: number): Promise<void> {
+    if (!getAccessToken()) {
+      writeGuestItems(readGuestItems().filter((item) => item.id !== cartItemId));
+      return;
+    }
+
     await requestJson(`/cart/items/${cartItemId}`, {
       method: "DELETE",
     });
-    window.dispatchEvent(new Event("cartUpdated"));
+    dispatchCartUpdated();
   },
 
   async clearCart(): Promise<void> {
+    if (!getAccessToken()) {
+      writeGuestItems([]);
+      return;
+    }
+
     await requestJson("/cart/clear", {
       method: "DELETE",
     });
-    window.dispatchEvent(new Event("cartUpdated"));
+    dispatchCartUpdated();
+  },
+
+  async syncGuestCartToServer(): Promise<void> {
+    if (!getAccessToken()) {
+      return;
+    }
+
+    const items = readGuestItems();
+    if (items.length === 0) {
+      return;
+    }
+
+    for (const item of items) {
+      await requestJson("/cart/items", {
+        method: "POST",
+        body: JSON.stringify({ variantId: item.variantId, quantity: item.quantity }),
+      });
+    }
+
+    writeGuestItems([]);
   },
 };

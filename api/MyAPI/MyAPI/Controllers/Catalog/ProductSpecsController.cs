@@ -1,10 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Application.DTOs;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Catalog
 {
     [ApiController]
     public class ProductSpecsController : ControllerBase
@@ -63,3 +60,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

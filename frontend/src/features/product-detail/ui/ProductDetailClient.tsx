@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   Check,
   CheckCircle2,
   Gift,
   Minus,
   Plus,
-  ShoppingBag,
   Star,
 } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { cartService } from "@/entities/cart";
+import { AddToCartButton, cartService } from "@/features/cart";
 import { cn } from "@/shared/lib";
 import type { ProductDetailModel, ProductVariantModel } from "@/entities/product";
 
@@ -27,27 +27,28 @@ type Review = {
 };
 
 const STORE_LOCATIONS = [
-  "VNB PREMIUM Quận 1",
-  "VNB PREMIUM Ninh Kiều Cần Thơ",
-  "VNB Quận 3",
-  "Tổng Kho VNB",
-  "VNB Đống Đa",
-  "VNB Tây Hồ",
-  "VNB Thanh Trì",
-  "VNB Cẩm Lệ Đà Nẵng",
-  "VNB Cái Răng Cần Thơ",
-  "VNB Thủ Dầu Một",
-  "VNB TP Bến Cát",
-  "VNB Trảng Bom",
-  "VNB Đức Trọng",
-  "VNB Quy Nhơn",
-  "VNB Rạch Giá",
-  "VNB TP Phú Quốc",
+  "FlyShot PREMIUM Quận 1",
+  "FlyShot PREMIUM Ninh Kiều Cần Thơ",
+  "FlyShot PREMIUM Quận 3",
+  "Tổng Kho FlyShot",
+  "FlyShot Đống Đa",
+  "FlyShot Tây Hồ",
+  "FlyShot Thanh Trì",
+  "FlyShot Cẩm Lệ Đà Nẵng",
+  "FlyShot Cái Răng Cần Thơ",
+  "FlyShot Thủ Dầu Một",
+  "FlyShot TP Bến Cát",
+  "FlyShot Trảng Bom",
+  "FlyShot Đức Trọng",
+  "FlyShot Quy Nhơn",
+  "FlyShot Rạch Giá",
+  "FlyShot TP Phú Quốc",
 ];
 
 const CITIES = ["Tất cả tỉnh thành", "Hồ Chí Minh", "Hà Nội", "Đà Nẵng", "Cần Thơ", "Bình Dương"];
 
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
@@ -84,13 +85,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const productCode = `VNB${String(product.id).padStart(6, "0")}`;
   const listPrice = Math.ceil((currentPrice * 1.2) / 1000) * 1000;
 
-  useEffect(() => {
-    setSelectedImage(0);
-    setSelectedVariantId(inStockVariants[0]?.id ?? product.variants[0]?.id ?? null);
-    setQuantity(1);
-    setCartMessage(null);
-  }, [inStockVariants, product.id, product.variants]);
-
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(price);
 
@@ -122,9 +116,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     setComment("");
   };
 
-  const handleAddToCart = async () => {
+  const handleBuyNow = async () => {
     if (!selectedVariant) {
-      setCartMessage("Sản phẩm chưa có biến thể để thêm vào giỏ hàng.");
+      setCartMessage("Sản phẩm chưa có biến thể để thanh toán.");
       return;
     }
 
@@ -133,10 +127,9 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
     try {
       await cartService.addItem(selectedVariant.id, quantity);
-      setCartMessage("Đã thêm sản phẩm vào giỏ hàng.");
+      router.push("/checkout");
     } catch (addError) {
       setCartMessage(addError instanceof Error ? addError.message : "Không thể thêm sản phẩm vào giỏ hàng.");
-    } finally {
       setAddingToCart(false);
     }
   };
@@ -157,21 +150,21 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
             <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600">
               <span>
-                Mã: <span className="font-medium text-orange-600">{productCode}</span>
+                Mã: <span className="font-medium text-[#ff6b6b]">{productCode}</span>
               </span>
               <span>
-                Thương hiệu: <span className="font-medium text-orange-600">{product.brand || "Đang cập nhật"}</span>
+                Thương hiệu: <span className="font-medium text-[#115151]">{product.brand || "Đang cập nhật"}</span>
               </span>
               <span>
                 Tình trạng:{" "}
-                <span className={cn("font-medium", currentStock > 0 ? "text-orange-600" : "text-red-600")}>
+                <span className={cn("font-medium", currentStock > 0 ? "text-emerald-600" : "text-red-600")}>
                   {currentStock > 0 ? "Còn hàng" : "Hết hàng"}
                 </span>
               </span>
             </div>
 
             <div className="mt-4 flex flex-wrap items-end gap-2 border-b border-slate-200 pb-4">
-              <span className="text-[23px] font-bold leading-none text-rose-600">{formatPrice(currentPrice)}</span>
+              <span className="text-[23px] font-bold leading-none text-[#ff6b6b]">{formatPrice(currentPrice)}</span>
               <span className="text-sm text-slate-400">
                 Giá niêm yết: <span className="line-through">{formatPrice(listPrice)}</span>
               </span>
@@ -201,19 +194,19 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                   type="button"
                   onClick={() => handleQuantityChange("decrease")}
                   disabled={quantity <= 1}
-                  className="grid h-7 w-7 place-items-center rounded-full bg-orange-600 text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-orange-200"
+                  className="grid h-7 w-7 place-items-center rounded-full bg-[#115151] text-white transition hover:bg-[#196b6b] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                   aria-label="Giảm số lượng"
                 >
                   <Minus className="h-3.5 w-3.5" strokeWidth={2.4} />
                 </button>
-                <span className="mx-1 grid h-8 w-24 place-items-center rounded border border-orange-500 bg-white text-sm text-orange-600">
+                <span className="mx-1 grid h-8 w-16 place-items-center rounded border border-[#115151] bg-white text-sm font-semibold text-[#115151]">
                   {quantity}
                 </span>
                 <button
                   type="button"
                   onClick={() => handleQuantityChange("increase")}
                   disabled={!canAddToCart || quantity >= currentStock}
-                  className="grid h-7 w-7 place-items-center rounded-full bg-orange-600 text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-orange-200"
+                  className="grid h-7 w-7 place-items-center rounded-full bg-[#115151] text-white transition hover:bg-[#196b6b] disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                   aria-label="Tăng số lượng"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={2.4} />
@@ -221,23 +214,21 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
             </div>
 
-            <div className="mt-4 grid gap-3 sm:grid-cols-[168px_250px]">
+            <div className="mt-5 grid gap-3 sm:grid-cols-[168px_1fr]">
               <button
                 type="button"
-                disabled={!canAddToCart}
-                className="h-12 rounded bg-amber-400 px-5 text-base font-bold uppercase text-white transition hover:bg-amber-500 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                Mua ngay
-              </button>
-              <button
-                type="button"
-                onClick={handleAddToCart}
+                onClick={handleBuyNow}
                 disabled={addingToCart || !canAddToCart}
-                className="inline-flex h-12 items-center justify-center gap-2 rounded bg-orange-600 px-5 text-base font-bold uppercase text-white transition hover:bg-orange-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="h-12 rounded bg-[#ffb703] px-5 text-base font-bold uppercase text-white transition hover:bg-[#e5a600] disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                <ShoppingBag className="h-5 w-5" strokeWidth={2} />
-                {addingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
+                {addingToCart ? "Đang xử lý..." : "Mua ngay"}
               </button>
+              <AddToCartButton
+                variantId={selectedVariant?.id ?? null}
+                quantity={quantity}
+                disabled={!canAddToCart}
+                className="w-full"
+              />
             </div>
 
             {cartMessage ? (
@@ -303,7 +294,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                     <Star
                       className={cn(
                         "h-7 w-7 transition",
-                        rating >= star ? "fill-amber-400 text-amber-400" : "text-slate-300 hover:text-amber-300"
+                        rating >= star ? "fill-[#ffb703] text-[#ffb703]" : "text-slate-300 hover:text-amber-300"
                       )}
                       strokeWidth={1.6}
                     />
@@ -315,10 +306,10 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
                 placeholder="Nhập nhận xét của bạn"
-                className="mt-4 min-h-32 w-full rounded border border-slate-200 bg-white p-4 text-sm text-slate-800 outline-none transition focus:border-orange-500 focus:ring-4 focus:ring-orange-100"
+                className="mt-4 min-h-32 w-full rounded border border-slate-200 bg-white p-4 text-sm text-slate-800 outline-none transition focus:border-[#ff6b6b] focus:ring-4 focus:ring-red-500/10"
               />
 
-              <Button onClick={handleSubmitReview} className="mt-4 bg-orange-600 hover:bg-orange-700">
+              <Button onClick={handleSubmitReview} className="mt-4 bg-[#ff6b6b] hover:bg-[#fa5252]">
                 Gửi đánh giá
               </Button>
             </div>
@@ -335,7 +326,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               ) : (
                 reviews.map((item, index) => (
                   <div key={`${item.date}-${index}`} className="rounded border border-slate-200 bg-white p-4">
-                    <div className="mb-2 flex items-center gap-1 text-amber-400">
+                    <div className="mb-2 flex items-center gap-1 text-[#ffb703]">
                       {Array.from({ length: item.rating }).map((_, starIndex) => (
                         <Star key={starIndex} className="h-4 w-4 fill-current" strokeWidth={1.6} />
                       ))}
@@ -385,7 +376,7 @@ function ProductGallery({
             onClick={() => onSelect(index)}
             className={cn(
               "relative h-[88px] w-[68px] shrink-0 border bg-white transition",
-              selectedImage === index ? "border-orange-500" : "border-slate-200 hover:border-orange-300"
+              selectedImage === index ? "border-[#ff6b6b]" : "border-slate-200 hover:border-red-300"
             )}
             aria-label={`Xem ảnh sản phẩm ${index + 1}`}
           >
@@ -399,16 +390,16 @@ function ProductGallery({
 
 function PromotionBox() {
   return (
-    <section className="relative mt-6 rounded border border-dotted border-orange-500 px-4 pb-4 pt-7">
-      <div className="absolute -top-[15px] left-3 inline-flex h-8 items-center gap-2 rounded border border-orange-500 bg-white px-3 text-sm font-bold uppercase text-orange-600">
-        <Gift className="h-4 w-4 fill-orange-500 text-orange-500" strokeWidth={2} />
+    <section className="relative mt-6 rounded border border-dotted border-[#115151] px-4 pb-4 pt-7 bg-[#115151]/5">
+      <div className="absolute -top-[15px] left-3 inline-flex h-8 items-center gap-2 rounded border border-[#115151] bg-white px-3 text-sm font-bold uppercase text-[#115151]">
+        <Gift className="h-4 w-4 fill-[#fac927] text-[#ee1313]" strokeWidth={2} />
         Ưu đãi
       </div>
 
-      <ul className="space-y-3 text-sm leading-6 text-slate-600">
+      <ul className="space-y-3 text-sm leading-6 text-slate-700">
         <OfferItem>
-          Tặng 2 Quấn cán vợt Cầu Lông: <span className="text-orange-600">VNB 001, VS002</span> hoặc{" "}
-          <span className="text-orange-600">Joto 001</span>
+          Tặng 2 Quấn cán vợt Cầu Lông: <span className="text-[#ff6b6b] font-medium">VNB 001, VS002</span> hoặc{" "}
+          <span className="text-[#ff6b6b] font-medium">Joto 001</span>
         </OfferItem>
         <OfferItem>Sản phẩm cam kết chính hãng</OfferItem>
         <OfferItem>Một số sản phẩm sẽ được tặng bao đơn hoặc bao nhung bảo vệ vợt</OfferItem>
@@ -416,11 +407,11 @@ function PromotionBox() {
         <OfferItem>Bảo hành chính hãng theo nhà sản xuất (Trừ hàng nội địa, xách tay)</OfferItem>
       </ul>
 
-      <div className="mt-8">
-        <h3 className="text-base font-bold text-slate-700">
-          🎁 Ưu đãi thêm khi mua sản phẩm tại <span className="text-orange-600">VNB Premium</span>
+      <div className="mt-6 border-t border-dashed border-[#115151]/20 pt-4">
+        <h3 className="text-base font-bold text-[#115151]">
+          Ưu đãi thêm khi mua sản phẩm tại Store FlyShot
         </h3>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-600">
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-700">
           {[
             "Sơn logo mặt vợt miễn phí",
             "Bảo hành lưới đan trong 72 giờ",
@@ -429,11 +420,11 @@ function PromotionBox() {
             "Voucher giảm giá cho lần mua hàng tiếp theo",
           ].map((item) => (
             <li key={item} className="flex gap-2">
-              <span className="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-sm bg-emerald-400 text-white">
+              <span className="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-sm bg-[#28a332] text-white">
                 <Check className="h-3 w-3" strokeWidth={3} />
               </span>
               <span>
-                <span className="text-orange-600">{item.split(" ")[0]} {item.split(" ")[1]}</span>
+                <span className="text-[#ff6b6b] font-semibold">{item.split(" ")[0]} {item.split(" ")[1]}</span>
                 {item.split(" ").slice(2).length > 0 ? ` ${item.split(" ").slice(2).join(" ")}` : ""}
               </span>
             </li>
@@ -447,7 +438,7 @@ function PromotionBox() {
 function OfferItem({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex gap-2">
-      <Check className="mt-1 h-4 w-4 shrink-0 text-indigo-600" strokeWidth={3} />
+      <Check className="mt-1 h-4 w-4 shrink-0 text-[#28a332]" strokeWidth={3} />
       <span>{children}</span>
     </li>
   );
@@ -455,8 +446,8 @@ function OfferItem({ children }: { children: React.ReactNode }) {
 
 function StockPanel() {
   return (
-    <aside className="relative rounded border border-dotted border-orange-500 p-3 pt-8 lg:sticky lg:top-24">
-      <div className="absolute -top-[15px] left-3 rounded border border-orange-500 bg-white px-3 py-1 text-sm font-bold uppercase text-orange-600">
+    <aside className="relative rounded border border-dotted border-[#115151] p-3 pt-8 lg:sticky lg:top-24 bg-[#115151]/5">
+      <div className="absolute -top-[15px] left-3 rounded border border-[#115151] bg-white px-3 py-1 text-sm font-bold uppercase text-[#115151]">
         Đang có hàng tại
       </div>
 
@@ -466,18 +457,18 @@ function StockPanel() {
       <select
         id="store-city"
         defaultValue={CITIES[0]}
-        className="h-9 w-full rounded border border-orange-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-100"
+        className="h-9 w-full rounded border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#115151] focus:ring-2 focus:ring-[#115151]/10"
       >
         {CITIES.map((city) => (
           <option key={city}>{city}</option>
         ))}
       </select>
 
-      <div className="mt-3 max-h-[570px] overflow-y-auto">
+      <div className="mt-3 max-h-[570px] overflow-y-auto rounded border border-slate-100 bg-white">
         {STORE_LOCATIONS.map((store) => (
           <div
             key={store}
-            className="border-b border-orange-200 bg-[#ef7148] px-3 py-2.5 text-sm font-bold text-white last:border-b-0"
+            className="border-b border-slate-100 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 last:border-b-0 transition"
           >
             {store}
           </div>
@@ -519,13 +510,13 @@ function VariantPicker({
               className={cn(
                 "min-h-14 rounded border px-3 py-2 text-left text-sm transition",
                 selected
-                  ? "border-orange-500 bg-orange-50 text-orange-700"
-                  : "border-slate-200 bg-white text-slate-700 hover:border-orange-300",
+                  ? "border-[#ff6b6b] bg-red-50/50 text-[#ff6b6b]"
+                  : "border-slate-200 bg-white text-slate-700 hover:border-red-300",
                 variant.stock <= 0 && "cursor-not-allowed opacity-55"
               )}
             >
               <span className="block font-bold">{label}</span>
-              <span className="mt-1 block text-xs">
+              <span className="mt-1 block text-xs opacity-80">
                 {formatPrice(variant.price)} · còn {variant.stock}
               </span>
             </button>

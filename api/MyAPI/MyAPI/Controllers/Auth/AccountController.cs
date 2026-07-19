@@ -1,11 +1,8 @@
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyAPI.Application.DTOs;
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
 
-namespace MyAPI.Controllers
+namespace MyAPI.Controllers.Auth
 {
     [Route("api/account")]
     [ApiController]
@@ -24,7 +21,7 @@ namespace MyAPI.Controllers
         {
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _accountService.GetCurrentUserAsync(userId);
@@ -36,7 +33,7 @@ namespace MyAPI.Controllers
         {
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _accountService.UpdateProfileAsync(userId, dto);
@@ -53,7 +50,7 @@ namespace MyAPI.Controllers
 
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "Khong the xac dinh nguoi dung hien tai." });
+                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
             }
 
             var result = await _accountService.ChangePasswordAsync(userId, dto);
@@ -77,3 +74,5 @@ namespace MyAPI.Controllers
         }
     }
 }
+
+

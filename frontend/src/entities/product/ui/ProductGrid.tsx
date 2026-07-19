@@ -1,5 +1,5 @@
-import ProductCard from "./ProductCard";
 import type { ProductCardModel } from "@/entities/product";
+import { ProductCard } from "@/shared/ui";
 
 interface ProductGridProps {
   products: ProductCardModel[];
@@ -20,9 +20,19 @@ export default function ProductGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} showBadge={showBadge} />
+        <ProductCard
+          key={product.id}
+          id={product.id}
+          name={product.name}
+          image={product.image}
+          price={product.price}
+          stock={product.stock}
+          brand={product.brand ?? undefined}
+          category={product.category}
+          showBadge={showBadge}
+        />
       ))}
     </div>
   );

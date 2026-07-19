@@ -1,5 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using MyAPI.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Infrastructure.Persistence
 {
@@ -30,6 +29,7 @@ namespace MyAPI.Infrastructure.Persistence
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
         public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; } = null!;
         public DbSet<Banner> Banners { get; set; } = null!;
+        public DbSet<Store> Stores { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -589,3 +589,4 @@ namespace MyAPI.Infrastructure.Persistence
         }
     }
 }
+

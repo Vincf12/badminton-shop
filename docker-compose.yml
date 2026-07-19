@@ -2,6 +2,7 @@ services:
   db:
     image: mysql:8.0
     container_name: badminton_mysql
+    command: --default-authentication-plugin=mysql_native_password --log-bin-trust-function-creators=1
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}

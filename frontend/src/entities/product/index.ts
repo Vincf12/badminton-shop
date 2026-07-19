@@ -6,7 +6,6 @@ export {
   fetchProducts,
   productService,
 } from "./api/productService";
-export { default as ProductCard } from "./ui/ProductCard";
 export { default as ProductGrid } from "./ui/ProductGrid";
 export type {
   ProductCardModel,

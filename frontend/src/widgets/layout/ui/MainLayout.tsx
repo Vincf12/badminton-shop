@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   ChevronDown,
@@ -17,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "@/features/auth";
-import { cartService } from "@/entities/cart";
+import { cartService } from "@/features/cart";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -26,7 +27,7 @@ interface MainLayoutProps {
 const navItems = [
   { to: "/", label: "Trang chủ" },
   { to: "/shop", label: "Sản phẩm" },
-  { to: "/about", label: "Về FlyShot" },
+  { to: "/about", label: "Về chúng tôi" },
   { to: "/contact", label: "Liên hệ" },
 ];
 
@@ -62,6 +63,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const currentYear = new Date().getFullYear();
 
   const { user, logout, isAuthenticated } = useAuth();
+  const userRole = user?.role?.toLowerCase();
+  const canOpenAdmin = userRole === "admin" || userRole === "staff";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -79,11 +82,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   useEffect(() => {
     const loadCartCount = async () => {
-      if (!isAuthenticated) {
-        setCartCount(0);
-        return;
-      }
-
       try {
         const count = await cartService.getCartCount();
         setCartCount(count);
@@ -123,59 +121,57 @@ export default function MainLayout({ children }: MainLayoutProps) {
         className={`fixed left-0 right-0 top-0 z-50 transition-all duration-500 ${
           isHome && !scrolled
             ? "border-b border-white/15 bg-white/12 backdrop-blur-md shadow-none"
-            : "border-b border-white/10 bg-[#061017]/90 backdrop-blur-xl shadow-[0_18px_50px_rgba(0,0,0,0.24)]"
+            : " border-b border-white/10 bg-[#061017]/90 backdrop-blur-xl shadow-[0_18px_50px_rgba(0,0,0,0.24)]"
         }`}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex h-[72px] items-center justify-between gap-4 lg:h-20">
-            <Link
-              href="/"
-              className="group flex shrink-0 items-center gap-3"
-              aria-label="FlyShot home"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-emerald-300 text-[#07111a] shadow-[0_12px_30px_rgba(0,0,0,0.22)] transition-transform duration-300 group-hover:-translate-y-0.5">
-                <span className="text-base font-black tracking-[-0.03em]">
-                  FS
-                </span>
-              </div>
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="flex h-[80px] lg:h-[84px] items-center">
+            {/* Logo + Navigation */}
+            <div className="flex items-center gap-16">
+              <Link
+                href="/"
+                className="group flex shrink-0 items-center gap-3"
+                aria-label="FlyShot home" >
+                <div className="leading-none">
+                  <span className="block text-2xl font-black tracking-[-0.05em] text-white">
+                    FlyShot
+                  </span>
 
-              <div className="leading-none">
-                <span className="block text-2xl font-black tracking-[-0.05em] text-white">
-                  FlyShot
-                </span>
-                <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-300">
-                  Badminton
-                </span>
-              </div>
-            </Link>
+                  <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.28em] text-emerald-300">
+                    Badminton
+                  </span>
+                </div>
+              </Link>
 
-            <nav
-              className="hidden items-center gap-2 lg:flex"
-              aria-label="Điều hướng chính"
-            >
-              {navItems.map((item) => {
-                const active = pathname === item.to;
+              <nav
+                className="hidden items-center gap-1 lg:flex"
+                aria-label="Điều hướng chính"
+              >
+                {navItems.map((item) => {
+                  const active = pathname === item.to;
 
-                return (
-                  <Link
-                    key={item.to}
-                    href={item.to}
-                    className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
-                      active
-                        ? "bg-emerald-300 text-[#07111a]"
-                        : "text-white/75 hover:bg-white/10 hover:text-white"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
+                  return (
+                    <Link
+                      key={item.to}
+                      href={item.to}
+                      className={`rounded-full px-5 py-2.5 text-[15px] font-semibold transition-all duration-300 ${
+                        active
+                          ? "bg-emerald-300 text-[#07111a]"
+                          : "text-white/80 hover:-translate-y-0.5 hover:bg-white/15 hover:backdrop-blur hover:text-white"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            {/* Right Actions */}
+            <div className="ml-auto flex items-center gap-3">
               <Link
                 href="/shop"
-                className="hidden h-11 items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 text-sm font-medium text-white/75 transition hover:border-emerald-300/40 hover:text-white md:flex"
+                className="hidden h-12 min-w-[180px] items-center gap-3 rounded-full border border-white/10 bg-white/10 px-5 text-sm font-medium text-white/80 backdrop-blur transition-all duration-300 hover:border-emerald-300/40 hover:bg-white/15 hover:text-white md:flex"
               >
                 <Search className="h-4 w-4" strokeWidth={1.8} />
                 <span>Tìm kiếm</span>
@@ -183,12 +179,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
               <Link
                 href="/cart"
-                className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:border-emerald-300/40 hover:text-emerald-300"
+                className="relative flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition-all duration-300 hover:border-emerald-300/40 hover:bg-white/15 hover:text-emerald-300"
                 aria-label="Xem giỏ hàng"
               >
                 <ShoppingBag className="h-5 w-5" strokeWidth={1.8} />
 
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[11px] font-black text-[#07111a] ring-2 ring-[#061017]">
+                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-emerald-500 px-1 text-[11px] font-black text-[#07111a] ring-2 ring-[#061017]">
                   {cartCount}
                 </span>
               </Link>
@@ -198,12 +194,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   <button
                     type="button"
                     onClick={() => setShowUserMenu((value) => !value)}
-                    className="flex h-11 items-center gap-2 rounded-full bg-emerald-300 px-4 text-sm font-bold text-[#07111a] transition hover:bg-emerald-200"
+                    className="flex h-12 items-center gap-2 rounded-full bg-emerald-300 px-5 text-sm font-bold text-[#07111a] shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-200 hover:shadow-lg"
                   >
                     <User className="h-4 w-4" strokeWidth={1.8} />
-                    <span className="max-w-28 truncate">
+
+                    <span className="max-w-32 truncate">
                       {user?.fullName || "Tài khoản"}
                     </span>
+
                     <ChevronDown
                       className="h-4 w-4 text-[#07111a]/70"
                       strokeWidth={1.8}
@@ -211,20 +209,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
                   </button>
 
                   {showUserMenu && (
-                    <div className="absolute right-0 top-full z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
+                    <div className="absolute right-0 top-full z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-2xl">
                       <div className="border-b border-slate-100 px-4 py-3">
                         <p className="truncate text-sm font-semibold text-slate-950">
                           {user?.fullName || "Tài khoản"}
                         </p>
                       </div>
 
-                      <Link
-                        href="/dashboard"
-                        onClick={() => setShowUserMenu(false)}
-                        className="block px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"
-                      >
-                        Dashboard
-                      </Link>
+                      {canOpenAdmin && (
+                        <Link
+                          href="/admin"
+                          onClick={() => setShowUserMenu(false)}
+                          className="block px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                        >
+                          Trang quản trị
+                        </Link>
+                      )}
 
                       <Link
                         href="/profile"
@@ -251,7 +251,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               ) : (
                 <Link
                   href="/login"
-                  className="hidden h-11 items-center gap-2 rounded-full bg-emerald-300 px-5 text-sm font-bold text-[#07111a] transition hover:bg-emerald-200 md:flex"
+                  className="hidden h-12 items-center gap-2 rounded-full bg-emerald-300 px-6 text-sm font-bold text-[#07111a] shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:bg-emerald-200 hover:shadow-lg md:flex"
                 >
                   <User className="h-4 w-4" strokeWidth={1.8} />
                   <span>Đăng nhập</span>
@@ -260,7 +260,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
               <button
                 type="button"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition hover:border-emerald-300/40 lg:hidden"
+                className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/10 text-white transition-all duration-300 hover:border-emerald-300/40 lg:hidden"
                 onClick={() => setMenuOpen((value) => !value)}
                 aria-label="Mở menu"
               >

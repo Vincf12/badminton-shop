@@ -5,8 +5,7 @@ import { MainLayout } from "@/widgets/layout";
 import Image from "next/image";
 import Link from "next/link";
 import { Trash2, Plus, Minus } from "lucide-react";
-import { cartService } from "@/entities/cart";
-import type { CartItemModel } from "@/entities/cart";
+import { cartService, type CartItemModel } from "@/features/cart";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItemModel[]>([]);
@@ -211,9 +210,12 @@ export default function CartPage() {
                     </div>
                   </div>
                 </div>
-                <button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl font-bold text-lg transition-colors duration-300">
+                <Link
+                  href="/checkout"
+                  className="block w-full rounded-xl bg-emerald-600 py-4 text-center text-lg font-bold text-white transition-colors duration-300 hover:bg-emerald-700"
+                >
                   Thanh toán
-                </button>
+                </Link>
               </div>
             </div>
           </div>

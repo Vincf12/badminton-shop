@@ -1,5 +1,5 @@
 import { MainLayout } from "@/widgets/layout";
-import { ProductDetailClient } from "@/features/product-detail";
+import { ProductDetailPage } from "@/views/product-detail";
 import { fetchProduct } from "@/entities/product";
 
 interface ProductPageProps {
@@ -38,7 +38,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <MainLayout>
-      <ProductDetailClient product={product} />
+      <ProductDetailPage product={product} />
     </MainLayout>
   );
 }

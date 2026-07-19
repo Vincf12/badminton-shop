@@ -1,6 +1,4 @@
-using MyAPI.Services;
-using MyAPI.Services.Interfaces;
-
+﻿
 namespace MyAPI.Extensions
 {
     public static class ApplicationServiceCollectionExtensions
@@ -35,3 +33,4 @@ namespace MyAPI.Extensions
         }
     }
 }
+
