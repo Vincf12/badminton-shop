@@ -248,7 +248,7 @@ export default function ProfilePage() {
     return (
       <MainLayout>
         <section className="py-14">
-          <div className="mx-auto max-w-2xl rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto max-w-7xl rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-sm">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700">
               <User className="h-8 w-8" />
             </div>
@@ -273,7 +273,7 @@ export default function ProfilePage() {
   return (
     <MainLayout>
       <div className="py-8 text-gray-900 lg:py-10">
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-6 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-6">
             {/* THÔNG TIN CÁ NHÂN */}
             <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">

@@ -22,7 +22,7 @@ namespace MyAPI.Application.Services.Auth
             var emailExists = await _context.Users.AnyAsync(x => x.Email == dto.Email);
             if (emailExists)
             {
-                return ServiceResult<object>.BadRequest("Email Ä‘Ã£ tá»“n táº¡i trÃªn há»‡ thá»‘ng.");
+                return ServiceResult<object>.BadRequest("Email đã tồn tại trên hệ thống.");
             }
 
             var user = new User
@@ -36,7 +36,7 @@ namespace MyAPI.Application.Services.Auth
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("ÄÄƒng kÃ½ thÃ nh cÃ´ng.");
+            return ServiceResult<object>.OK("Đăng ký thành công.");
         }
 
         public async Task<ServiceResult<object>> LoginAsync(LoginDto dto)
@@ -44,19 +44,19 @@ namespace MyAPI.Application.Services.Auth
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == dto.Email);
             if (user == null)
             {
-                return ServiceResult<object>.Error(StatusCodes.Status401Unauthorized, "Email hoáº·c máº­t kháº©u khÃ´ng chÃ­nh xÃ¡c.");
+                return ServiceResult<object>.Error(StatusCodes.Status401Unauthorized, "Email hoặc mật khẩu không chính xác.");
             }
 
             var passwordMatched = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
             if (!passwordMatched)
             {
-                return ServiceResult<object>.Error(StatusCodes.Status401Unauthorized, "Email hoáº·c máº­t kháº©u khÃ´ng chÃ­nh xÃ¡c.");
+                return ServiceResult<object>.Error(StatusCodes.Status401Unauthorized, "Email hoặc mật khẩu không chính xác.");
             }
 
             var jwtKey = _configuration["Jwt:Key"];
             if (string.IsNullOrEmpty(jwtKey))
             {
-                return ServiceResult<object>.Error(StatusCodes.Status500InternalServerError, "áº¥u hÃ¬nh há»‡ thá»‘ng lá»—i: thiáº¿u JWT Key.");
+                return ServiceResult<object>.Error(StatusCodes.Status500InternalServerError, "Cấu hình hệ thống lỗi: thiếu JWT Key.");
             }
 
             var claims = new[]
@@ -80,7 +80,7 @@ namespace MyAPI.Application.Services.Auth
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Dang nhap thanh cong.",
+                message = "Đăng nhập thành công.",
                 token = jwt,
                 user = new
                 {

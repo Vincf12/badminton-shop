@@ -13,7 +13,7 @@ namespace MyAPI.Application.Services.Auth
         }
 
         // =========================
-        // Láº¥y thÃ´ng tin tÃ i khoáº£n hiá»‡n táº¡i
+        // Lấy thông tin tài khoản hiện tại
         // =========================
         public async Task<ServiceResult<AccountDto>> GetCurrentUserAsync(int userId)
         {
@@ -24,12 +24,12 @@ namespace MyAPI.Application.Services.Auth
                 .FirstOrDefaultAsync();
 
             return user == null
-                ? ServiceResult<AccountDto>.NotFound("TÃ i khoáº£n khÃ´ng tá»“n táº¡i.")
+                ? ServiceResult<AccountDto>.NotFound("Tài khoản không tồn tại.")
                 : ServiceResult<AccountDto>.Ok(user);
         }
 
         // =========================
-        // Cáº­p nháº­t há»“ sÆ¡ cÃ¡ nhÃ¢n
+        // Cập nhật thông tin cá nhân
         // =========================
         public async Task<ServiceResult<object>> UpdateProfileAsync(int userId, UpdateProfileDto dto)
         {
@@ -37,13 +37,13 @@ namespace MyAPI.Application.Services.Auth
 
             if (user == null)
             {
-                return ServiceResult<object>.NotFound("TÃ i khoáº£n khÃ´ng tá»“n táº¡i.");
+                return ServiceResult<object>.NotFound("Tài khoản không tồn tại.");
             }
 
-            // Validate há» tÃªn
+            // Validate họ tên
             if (string.IsNullOrWhiteSpace(dto.FullName))
             {
-                return ServiceResult<object>.BadRequest("Há» tÃªn khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
+                return ServiceResult<object>.BadRequest("Họ tên không được để trống.");
             }
 
             var fullName = dto.FullName.Trim();
@@ -51,25 +51,25 @@ namespace MyAPI.Application.Services.Auth
             if (fullName.Length < 2 || fullName.Length > 100)
             {
                 return ServiceResult<object>.BadRequest(
-                    "Há» tÃªn pháº£i tá»« 2 Ä‘áº¿n 100 kÃ½ tá»±.");
+                    "Họ tên phải từ 2 đến 100 ký tự.");
             }
 
-            // Validate sá»‘ Ä‘iá»‡n thoáº¡i
+            // Validate số điện thoại
             string? phone = null;
 
             if (!string.IsNullOrWhiteSpace(dto.Phone))
             {
                 phone = dto.Phone.Trim();
 
-                // 9-11 sá»‘
+                // 9-11 số, chỉ chứa chữ số
                 if (!Regex.IsMatch(phone, @"^\d{9,11}$"))
                 {
                     return ServiceResult<object>.BadRequest(
-                        "Sá»‘ Ä‘iá»‡n thoáº¡i khÃ´ng há»£p lá»‡.");
+                        "Số điện thoại không hợp lệ.");
                 }
             }
 
-            // Validate ngÃ y sinh
+            // Validate ngày sinh
             if (dto.Birthdate.HasValue)
             {
                 var today = DateOnly.FromDateTime(DateTime.Today);
@@ -77,7 +77,7 @@ namespace MyAPI.Application.Services.Auth
                 if (dto.Birthdate.Value > today)
                 {
                     return ServiceResult<object>.BadRequest(
-                        "NgÃ y sinh khÃ´ng há»£p lá»‡.");
+                        "Ngày sinh không hợp lệ.");
                 }
 
                 var age = today.Year - dto.Birthdate.Value.Year;
@@ -85,11 +85,11 @@ namespace MyAPI.Application.Services.Auth
                 if (age < 13 || age > 120)
                 {
                     return ServiceResult<object>.BadRequest(
-                        "Tuá»•i pháº£i tá»« 13 Ä‘áº¿n 120.");
+                        "Tuổi phải từ 13 đến 120.");
                 }
             }
 
-            // Cáº­p nháº­t
+            // Cập nhật
             user.FullName = fullName;
             user.Phone = phone;
             user.Birthdate = dto.Birthdate;
@@ -98,11 +98,11 @@ namespace MyAPI.Application.Services.Auth
             await _context.SaveChangesAsync();
 
             return ServiceResult<object>.OK(
-                "Cáº­p nháº­t thÃ´ng tin cÃ¡ nhÃ¢n thÃ nh cÃ´ng.");
+                "Cập nhật thông tin cá nhân thành công.");
         }
 
         // =========================
-        // Äá»•i máº­t kháº©u
+        // Đổi mật khẩu
         // =========================
         public async Task<ServiceResult<object>> ChangePasswordAsync(
             int userId,
@@ -113,88 +113,88 @@ namespace MyAPI.Application.Services.Auth
             if (user == null)
             {
                 return ServiceResult<object>.NotFound(
-                    "TÃ i khoáº£n khÃ´ng tá»“n táº¡i.");
+                    "Tài khoản không tồn tại.");
             }
 
             // Validate input
             if (string.IsNullOrWhiteSpace(dto.OldPassword))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Vui lÃ²ng nháº­p máº­t kháº©u hiá»‡n táº¡i.");
+                    "Vui lòng nhập mật khẩu hiện tại.");
             }
 
             if (string.IsNullOrWhiteSpace(dto.NewPassword))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Vui lÃ²ng nháº­p máº­t kháº©u má»›i.");
+                    "Vui lòng nhập mật khẩu mới.");
             }
 
             if (string.IsNullOrWhiteSpace(dto.ConfirmPassword))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Vui lÃ²ng xÃ¡c nháº­n máº­t kháº©u má»›i.");
+                    "Vui lòng xác nhận mật khẩu mới.");
             }
 
-            // XÃ¡c nháº­n máº­t kháº©u
+            // Xác nhận mật khẩu
             if (dto.NewPassword != dto.ConfirmPassword)
             {
                 return ServiceResult<object>.BadRequest(
-                    "XÃ¡c nháº­n máº­t kháº©u khÃ´ng khá»›p.");
+                    "Xác nhận mật khẩu không khớp.");
             }
 
-            // ChÃ­nh sÃ¡ch máº­t kháº©u
+            // Chính sách mật khẩu
             if (dto.NewPassword.Length < 8)
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u pháº£i cÃ³ Ã­t nháº¥t 8 kÃ½ tá»±.");
+                    "Mật khẩu phải có ít nhất 8 ký tự.");
             }
 
             if (!Regex.IsMatch(dto.NewPassword, @"[A-Z]"))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t 1 chá»¯ hoa.");
+                    "Mật khẩu phải chứa ít nhất 1 chữ hoa.");
             }
 
             if (!Regex.IsMatch(dto.NewPassword, @"[a-z]"))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t 1 chá»¯ thÆ°á»ng.");
+                    "Mật khẩu phải chứa ít nhất 1 chữ thường.");
             }
 
             if (!Regex.IsMatch(dto.NewPassword, @"\d"))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u pháº£i chá»©a Ã­t nháº¥t 1 chá»¯ sá»‘.");
+                    "Mật khẩu phải chứa ít nhất 1 chữ số.");
             }
 
-            // Kiá»ƒm tra máº­t kháº©u cÅ©
+            // Kiểm tra mật khẩu cũ
             if (!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.PasswordHash))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u hiá»‡n táº¡i khÃ´ng chÃ­nh xÃ¡c.");
+                    "Mật khẩu hiện tại không chính xác.");
             }
 
-            // KhÃ´ng cho phÃ©p trÃ¹ng máº­t kháº©u cÅ©
+            // Không cho phép trùng mật khẩu cũ
             if (BCrypt.Net.BCrypt.Verify(dto.NewPassword, user.PasswordHash))
             {
                 return ServiceResult<object>.BadRequest(
-                    "Máº­t kháº©u má»›i khÃ´ng Ä‘Æ°á»£c trÃ¹ng vá»›i máº­t kháº©u cÅ©.");
+                    "Mật khẩu mới không được trùng với mật khẩu cũ.");
             }
 
-            // Hash máº­t kháº©u má»›i
+            // Hash mật khẩu mới
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(
                 dto.NewPassword,
                 workFactor: 12);
 
             user.UpdatedAt = DateTime.UtcNow;
 
-            // Náº¿u dÃ¹ng JWT cÃ³ thá»ƒ tÄƒng phiÃªn báº£n token
+            // Nếu dùng JWT có thể tăng phiên bản token
             // user.TokenVersion++;
 
             await _context.SaveChangesAsync();
 
             return ServiceResult<object>.OK(
-                "Äá»•i máº­t kháº©u thÃ nh cÃ´ng.");
+                "Đổi mật khẩu thành công.");
         }
 
         // =========================

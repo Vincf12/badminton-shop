@@ -45,7 +45,7 @@ namespace MyAPI.Application.Services.Customer
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Them dia chi thanh cong.",
+                message = "Thêm địa chỉ thành công.",
                 addressId = address.AddressId
             });
         }
@@ -55,7 +55,7 @@ namespace MyAPI.Application.Services.Customer
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == id && a.UserId == userId);
             if (address == null)
             {
-                return ServiceResult<object>.NotFound("Dia chi khong ton tai.");
+                return ServiceResult<object>.NotFound("Địa chỉ không tồn tại.");
             }
 
             if (dto.IsDefault)
@@ -71,7 +71,7 @@ namespace MyAPI.Application.Services.Customer
             address.IsDefault = dto.IsDefault;
 
             await _context.SaveChangesAsync();
-            return ServiceResult<object>.OK("Cap nhat dia chi thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật địa chỉ thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteAddressAsync(int userId, int id)
@@ -79,13 +79,13 @@ namespace MyAPI.Application.Services.Customer
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == id && a.UserId == userId);
             if (address == null)
             {
-                return ServiceResult<object>.NotFound("Dia chi khong ton tai.");
+                return ServiceResult<object>.NotFound("Địa chỉ không tồn tại.");
             }
 
             _context.Addresses.Remove(address);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa dia chi thanh cong.");
+            return ServiceResult<object>.OK("Xóa địa chỉ thành công.");
         }
 
         public async Task<ServiceResult<object>> SetDefaultAddressAsync(int userId, int id)
@@ -93,14 +93,14 @@ namespace MyAPI.Application.Services.Customer
             var address = await _context.Addresses.FirstOrDefaultAsync(a => a.AddressId == id && a.UserId == userId);
             if (address == null)
             {
-                return ServiceResult<object>.NotFound("Dia chi khong ton tai.");
+                return ServiceResult<object>.NotFound("Địa chỉ không tồn tại.");
             }
 
             await ClearDefaultAddressesAsync(userId);
             address.IsDefault = true;
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Dat dia chi mac dinh thanh cong.");
+            return ServiceResult<object>.OK("Đặt địa chỉ mặc định thành công.");
         }
 
         private async Task ClearDefaultAddressesAsync(int userId)

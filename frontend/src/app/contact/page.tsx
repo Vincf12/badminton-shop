@@ -48,7 +48,7 @@ export default function ContactPage() {
               <div className="space-y-3 border-b border-gray-100 pb-8 text-sm md:text-base">
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1">
                   <span className="font-mono text-xs uppercase tracking-wider text-gray-400 sm:w-28 block">Địa chỉ :</span>
-                  <span className="font-medium text-gray-900">113 Trần Đăng Ninh - Dịch Vọng - Cầu Giấy - Hà Nội</span>
+                  <span className="font-medium text-gray-900">91B - Đường Nguyễn Văn Linh - Quận 7 - Tp.Hồ Chí Minh</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-baseline gap-1">
                   <span className="font-mono text-xs uppercase tracking-wider text-gray-400 sm:w-28 block">Email :</span>

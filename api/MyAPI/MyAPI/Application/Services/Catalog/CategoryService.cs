@@ -29,7 +29,7 @@ namespace MyAPI.Application.Services.Catalog
                 .FirstOrDefaultAsync();
 
             return category == null
-                ? ServiceResult<CategoryDto>.NotFound("Khong tim thay danh muc.")
+                ? ServiceResult<CategoryDto>.NotFound("Không tìm thấy danh mục.")
                 : ServiceResult<CategoryDto>.Ok(category);
         }
 
@@ -39,7 +39,7 @@ namespace MyAPI.Application.Services.Catalog
             var exists = await _context.Categories.AnyAsync(c => c.CategoryName == categoryName);
             if (exists)
             {
-                return ServiceResult<CategoryDto>.BadRequest("Danh muc da ton tai.");
+                return ServiceResult<CategoryDto>.BadRequest("Danh mục đã tồn tại.");
             }
 
             var category = new Category
@@ -58,7 +58,7 @@ namespace MyAPI.Application.Services.Catalog
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
             if (category == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay danh muc.");
+                return ServiceResult<object>.NotFound("Không tìm thấy danh mục.");
             }
 
             var categoryName = dto.CategoryName.Trim();
@@ -68,13 +68,13 @@ namespace MyAPI.Application.Services.Catalog
 
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("Ten danh muc da ton tai.");
+                return ServiceResult<object>.BadRequest("Tên danh mục đã tồn tại.");
             }
 
             category.CategoryName = categoryName;
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Cap nhat danh muc thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật danh mục thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteCategoryAsync(int id)
@@ -82,19 +82,19 @@ namespace MyAPI.Application.Services.Catalog
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == id);
             if (category == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay danh muc.");
+                return ServiceResult<object>.NotFound("Không tìm thấy danh mục.");
             }
 
             var hasProducts = await _context.Products.AnyAsync(p => p.CategoryId == id);
             if (hasProducts)
             {
-                return ServiceResult<object>.BadRequest("Khong the xoa danh muc vi dang co san pham.");
+                return ServiceResult<object>.BadRequest("Không thể xóa danh mục vì đang có sản phẩm.");
             }
 
             _context.Categories.Remove(category);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa danh muc thanh cong.");
+            return ServiceResult<object>.OK("Xóa danh mục thành công.");
         }
 
         private static CategoryDto MapCategory(Category category)

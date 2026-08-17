@@ -29,7 +29,7 @@ namespace MyAPI.Application.Services.Catalog
                 .FirstOrDefaultAsync();
 
             return brand == null
-                ? ServiceResult<BrandDto>.NotFound("Khong tim thay thuong hieu.")
+                ? ServiceResult<BrandDto>.NotFound("Thương hiệu không tồn tại trên hệ thống.")
                 : ServiceResult<BrandDto>.Ok(brand);
         }
 
@@ -39,7 +39,7 @@ namespace MyAPI.Application.Services.Catalog
             var exists = await _context.Brands.AnyAsync(b => b.BrandName == brandName);
             if (exists)
             {
-                return ServiceResult<BrandDto>.BadRequest("Thuong hieu da ton tai tren he thong.");
+                return ServiceResult<BrandDto>.BadRequest("Thương hiệu đã tồn tại trên hệ thống.");
             }
 
             var brand = new Brand
@@ -58,20 +58,20 @@ namespace MyAPI.Application.Services.Catalog
             var brand = await _context.Brands.FirstOrDefaultAsync(b => b.BrandId == id);
             if (brand == null)
             {
-                return ServiceResult<object>.NotFound("Thuong hieu khong ton tai tren he thong.");
+                return ServiceResult<object>.NotFound("Thương hiệu không tồn tại trên hệ thống.");
             }
 
             var brandName = dto.BrandName.Trim();
             var exists = await _context.Brands.AnyAsync(b => b.BrandName == brandName && b.BrandId != id);
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("Thuong hieu da ton tai tren he thong.");
+                return ServiceResult<object>.BadRequest("Thương hiệu đã tồn tại trên hệ thống.");
             }
 
             brand.BrandName = brandName;
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Cap nhat thuong hieu thanh cong.");
+            return ServiceResult<object>.OK("ập nhật thương hiệu thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteBrandAsync(int id)
@@ -79,19 +79,19 @@ namespace MyAPI.Application.Services.Catalog
             var brand = await _context.Brands.FirstOrDefaultAsync(b => b.BrandId == id);
             if (brand == null)
             {
-                return ServiceResult<object>.NotFound("Thuong hieu khong ton tai tren he thong.");
+                return ServiceResult<object>.NotFound("Thương hiệu không tồn tại trên hệ thống.");
             }
 
             var hasProducts = await _context.Products.AnyAsync(p => p.BrandId == id);
             if (hasProducts)
             {
-                return ServiceResult<object>.BadRequest("Khong the xoa thuong hieu vi dang co san pham lien quan.");
+                return ServiceResult<object>.BadRequest("Không thể xóa thương hiệu vì đang có sản phẩm liên quan.");
             }
 
             _context.Brands.Remove(brand);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa thuong hieu thanh cong.");
+            return ServiceResult<object>.OK("Xóa thương hiệu thành công.");
         }
 
         private static BrandDto MapBrand(Brand brand)

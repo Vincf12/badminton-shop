@@ -39,7 +39,7 @@ export function AddToCartButton({
 
     try {
       await cartService.addItem(variantId, quantity);
-      setMessage("Đã thêm sản phẩm vào giỏ hàng.");
+      setMessage("");
       onSuccess?.();
     } catch (addError) {
       const errorMessage =

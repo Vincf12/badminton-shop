@@ -29,7 +29,7 @@ namespace MyAPI.Application.Services.Order
                 .FirstOrDefaultAsync();
 
             return coupon == null
-                ? ServiceResult<CouponDto>.NotFound("Khong tim thay coupon.")
+                ? ServiceResult<CouponDto>.NotFound("Không tìm thấy coupon.")
                 : ServiceResult<CouponDto>.Ok(coupon);
         }
 
@@ -39,7 +39,7 @@ namespace MyAPI.Application.Services.Order
             var exists = await _context.Coupons.AnyAsync(c => c.Code == code);
             if (exists)
             {
-                return ServiceResult<CouponDto>.BadRequest("Ma coupon da ton tai.");
+                return ServiceResult<CouponDto>.BadRequest("Mã coupon đã tồn tại.");
             }
 
             var coupon = new Coupon();
@@ -56,20 +56,20 @@ namespace MyAPI.Application.Services.Order
             var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.CouponId == id);
             if (coupon == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay coupon.");
+                return ServiceResult<object>.NotFound("Không tìm thấy coupon.");
             }
 
             var code = dto.Code.Trim().ToUpperInvariant();
             var exists = await _context.Coupons.AnyAsync(c => c.CouponId != id && c.Code == code);
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("Ma coupon da ton tai.");
+                return ServiceResult<object>.BadRequest("Mã coupon đã tồn tại.");
             }
 
             ApplyDto(coupon, dto, code);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Cap nhat coupon thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật coupon thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteCouponAsync(int id)
@@ -77,13 +77,13 @@ namespace MyAPI.Application.Services.Order
             var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.CouponId == id);
             if (coupon == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay coupon.");
+                return ServiceResult<object>.NotFound("Không tìm thấy coupon.");
             }
 
             _context.Coupons.Remove(coupon);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa coupon thanh cong.");
+            return ServiceResult<object>.OK("Xóa coupon thành công.");
         }
 
         public async Task<ServiceResult<object>> ApplyCouponAsync(ApplyCouponDto dto)
@@ -93,28 +93,28 @@ namespace MyAPI.Application.Services.Order
 
             if (coupon == null)
             {
-                return ServiceResult<object>.BadRequest("Ma giam gia khong ton tai.");
+                return ServiceResult<object>.BadRequest("Mã giảm giá không tồn tại.");
             }
 
             if (!coupon.IsActive)
             {
-                return ServiceResult<object>.BadRequest("Ma giam gia da bi khoa.");
+                return ServiceResult<object>.BadRequest("Mã giảm giá đã bị khóa.");
             }
 
             var now = DateTime.UtcNow;
             if (now < coupon.StartDate || now > coupon.EndDate)
             {
-                return ServiceResult<object>.BadRequest("Ma giam gia da het han hoac chua co hieu luc.");
+                return ServiceResult<object>.BadRequest("Mã giảm giá đã hết hạn hoặc chưa có hiệu lực.");
             }
 
             if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
             {
-                return ServiceResult<object>.BadRequest("Ma giam gia da het luot su dung.");
+                return ServiceResult<object>.BadRequest("Mã giảm giá đã hết lượt sử dụng.");
             }
 
             if (dto.OrderAmount < coupon.MinimumOrderAmount)
             {
-                return ServiceResult<object>.BadRequest($"Don hang phai tu {coupon.MinimumOrderAmount:N0} VND.");
+                return ServiceResult<object>.BadRequest($"Đơn hàng phải từ {coupon.MinimumOrderAmount:N0} VND.");
             }
 
             var discountAmount = coupon.DiscountType == "percentage"

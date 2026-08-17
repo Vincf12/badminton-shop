@@ -26,7 +26,7 @@ namespace MyAPI.Application.Services.Catalog
             var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
             if (!productExists)
             {
-                return ServiceResult<object>.BadRequest("San pham khong ton tai.");
+                return ServiceResult<object>.BadRequest("Sản phẩm không tồn tại.");
             }
 
             if (dto.IsMain)
@@ -47,7 +47,7 @@ namespace MyAPI.Application.Services.Catalog
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Them anh san pham thanh cong.",
+                message = "Thêm ảnh sản phẩm thành công.",
                 imageId = productImage.ImageId
             });
         }
@@ -57,7 +57,7 @@ namespace MyAPI.Application.Services.Catalog
             var image = await _context.ProductImages.FirstOrDefaultAsync(i => i.ImageId == id);
             if (image == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay anh san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy ảnh sản phẩm.");
             }
 
             if (dto.IsMain)
@@ -70,7 +70,7 @@ namespace MyAPI.Application.Services.Catalog
             image.SortOrder = dto.SortOrder;
 
             await _context.SaveChangesAsync();
-            return ServiceResult<object>.OK("Cap nhat anh san pham thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật ảnh sản phẩm thành công.");
         }
 
         public async Task<ServiceResult<object>> SetMainImageAsync(int id)
@@ -78,14 +78,14 @@ namespace MyAPI.Application.Services.Catalog
             var image = await _context.ProductImages.FirstOrDefaultAsync(i => i.ImageId == id);
             if (image == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay anh san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy ảnh sản phẩm.");
             }
 
             await ClearMainImagesAsync(image.ProductId, id);
             image.IsMain = true;
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Da dat lam anh chinh.");
+            return ServiceResult<object>.OK("Đã đặt làm ảnh chính.");
         }
 
         public async Task<ServiceResult<object>> DeleteImageAsync(int id)
@@ -93,13 +93,13 @@ namespace MyAPI.Application.Services.Catalog
             var image = await _context.ProductImages.FirstOrDefaultAsync(i => i.ImageId == id);
             if (image == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay anh san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy ảnh sản phẩm.");
             }
 
             _context.ProductImages.Remove(image);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa anh san pham thanh cong.");
+            return ServiceResult<object>.OK("Xóa ảnh sản phẩm thành công.");
         }
 
         private async Task ClearMainImagesAsync(int productId, int? excludedImageId = null)

@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StoreEntity = MyAPI.Domain.Entities.Store;
+using Microsoft.EntityFrameworkCore;
+using StoreEntity = MyAPI.Domain.Entities.Store.Store;
 
 namespace MyAPI.Application.Services.Store
 {
@@ -11,38 +11,38 @@ namespace MyAPI.Application.Services.Store
         {
             _context = context;
         }
-    //Láº¥y danh sÃ¡ch cá»­a hÃ ng vá»›i phÃ¢n trang vÃ  lá»c
+    // Lấy danh sách cửa hàng với phân trang và lọc
     public async Task<PagedResult<StoreResponse>> GetAllAsync(StoreFilterRequest request)
     {
         var query = _context.Stores
         .AsNoTracking()
         .AsQueryable();
         
-        //  // TÃ¬m kiáº¿m theo tÃªn hoáº·c mÃ£ cá»­a hÃ ng
+        // Tìm kiếm theo tên hoặc mã cửa hàng
         if (!string.IsNullOrEmpty(request.Keyword))
         {
             query = query.Where(s => s.StoreName.Contains(request.Keyword) || s.StoreCode.Contains(request.Keyword));
         }
 
-        // Lá»c theo tá»‰nh/thÃ nh phá»‘
+        // Lọc theo tỉnh/thành phố
         if (!string.IsNullOrEmpty(request.Province))
         {
             query = query.Where(s => s.Province == request.Province);
         }
 
-        // Lá»c theo tráº¡ng thÃ¡i hoáº¡t Ä‘á»™ng
+        // Lọc theo trạng thái hoạt động
         if (request.IsActive.HasValue)
         {
             query = query.Where(s => s.IsActive == request.IsActive.Value);
         }
 
-        // Lá»c theo Ä‘iá»ƒm láº¥y hÃ ng
+        // Lọc theo điểm lấy hàng
         if (request.IsPickupPoint.HasValue)
         {
             query = query.Where(s => s.IsPickupPoint == request.IsPickupPoint.Value);
         }
 
-        // Tá»•ng sá»‘ báº£n ghi
+        // Tổng số bản ghi
 
         var totalRecords = await query.CountAsync();
 
@@ -77,10 +77,10 @@ namespace MyAPI.Application.Services.Store
 
     }
 
-    //Láº¥y chi tiáº¿t cá»­a hÃ ng theo ID
+    // Lấy thông tin chi tiết cửa hàng theo ID
     public async Task<StoreDetailResponse?> GetByIdAsync(int storeId)
     {
-        // Kiá»ƒm tra xem cá»­a hÃ ng cÃ³ tá»“n táº¡i khÃ´ng
+        // Kiểm tra xem cửa hàng có tồn tại không
         var store = await _context.Stores
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.StoreId == storeId);
@@ -105,12 +105,12 @@ namespace MyAPI.Application.Services.Store
             };
     }
 
-    // Láº¥y danh sÃ¡ch cá»­a hÃ ng cho dropdown
+    // Lấy danh sách cửa hàng cho dropdown
     public async Task<IEnumerable<StoreSummaryResponse>> GetLookupAsync()
     {
         return await _context.Stores
             .AsNoTracking()
-            .Where(s => s.IsActive) // Chá»‰ láº¥y cÃ¡c cá»­a hÃ ng Ä‘ang hoáº¡t Ä‘á»™ng
+            .Where(s => s.IsActive) // Chỉ lấy các cửa hàng đang hoạt động
             .Select(s => new StoreSummaryResponse
             {
                 StoreId = s.StoreId,
@@ -124,14 +124,14 @@ namespace MyAPI.Application.Services.Store
 
     public async Task<StoreResponse> CreateAsync(CreateStoreRequest request)
     {
-        // Kiá»ƒm tra mÃ£ cá»­a hÃ ng Ä‘Ã£ tá»“n táº¡i
+        // Kiểm tra mã cửa hàng đã tồn tại
         var existingStore = await _context.Stores
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.StoreCode == request.StoreCode);
 
         if (existingStore != null)
         {
-            throw new InvalidOperationException("MÃ£ cá»­a hÃ ng Ä‘Ã£ tá»“n táº¡i.");
+            throw new InvalidOperationException("Mã cửa hàng đã tồn tại.");
         }
 
         var store = new StoreEntity

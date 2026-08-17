@@ -40,7 +40,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (product == null)
             {
-                return ServiceResult<ProductDetailDto>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<ProductDetailDto>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             return ServiceResult<ProductDetailDto>.Ok(product);
@@ -50,7 +50,7 @@ namespace MyAPI.Application.Services.Catalog
         {
             if (string.IsNullOrWhiteSpace(slug))
             {
-                return ServiceResult<ProductDetailDto>.BadRequest("Slug khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
+                return ServiceResult<ProductDetailDto>.BadRequest("Slug không được để trống.");
             }
 
             slug = slug.Trim();
@@ -89,7 +89,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (product == null)
             {
-                return ServiceResult<ProductDetailDto>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<ProductDetailDto>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             return ServiceResult<ProductDetailDto>.Ok(product);
@@ -101,14 +101,14 @@ namespace MyAPI.Application.Services.Catalog
 
             if (!categoryExists)
             {
-                return ServiceResult<ProductDetailDto>.BadRequest("Danh má»¥c khÃ´ng tá»“n táº¡i.");
+                return ServiceResult<ProductDetailDto>.BadRequest("Danh mục không tồn tại.");
             }
 
             var brandExists = await _context.Brands.AnyAsync(brand => brand.BrandId == dto.BrandId);
 
             if (!brandExists)
             {
-                return ServiceResult<ProductDetailDto>.BadRequest("ThÆ°Æ¡ng hiá»‡u khÃ´ng tá»“n táº¡i.");
+                return ServiceResult<ProductDetailDto>.BadRequest("Thương hiệu không tồn tại.");
             }
 
             var product = new Product
@@ -157,21 +157,21 @@ namespace MyAPI.Application.Services.Catalog
 
             if (product == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<object>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             var categoryExists = await _context.Categories.AnyAsync(category => category.CategoryId == dto.CategoryId);
 
             if (!categoryExists)
             {
-                return ServiceResult<object>.BadRequest("Danh má»¥c khÃ´ng tá»“n táº¡i.");
+                return ServiceResult<object>.BadRequest("Danh mục không tồn tại.");
             }
 
             var brandExists = await _context.Brands.AnyAsync(brand => brand.BrandId == dto.BrandId);
 
             if (!brandExists)
             {
-                return ServiceResult<object>.BadRequest("ThÆ°Æ¡ng hiá»‡u khÃ´ng tá»“n táº¡i.");
+                return ServiceResult<object>.BadRequest("Thương hiệu không tồn tại.");
             }
 
             product.CategoryId = dto.CategoryId;
@@ -222,7 +222,7 @@ namespace MyAPI.Application.Services.Catalog
 
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "Cáº­p nháº­t sáº£n pháº©m thÃ nh cÃ´ng." });
+            return ServiceResult<object>.Ok(new { message = "Cập nhật sản phẩm thành công." });
         }
 
         public async Task<ServiceResult<object>> DeleteProductAsync(int id)
@@ -231,7 +231,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (product == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<object>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             _context.Products.Remove(product);
@@ -242,17 +242,17 @@ namespace MyAPI.Application.Services.Catalog
             }
             catch (DbUpdateException)
             {
-                return ServiceResult<object>.BadRequest("KhÃ´ng thá»ƒ xÃ³a sáº£n pháº©m vÃ¬ Ä‘ang Ä‘Æ°á»£c tham chiáº¿u bá»Ÿi dá»¯ liá»‡u khÃ¡c.");
+                return ServiceResult<object>.BadRequest("Không thể xóa sản phẩm vì đang được tham chiếu bởi dữ liệu khác.");
             }
 
-            return ServiceResult<object>.Ok(new { message = "XÃ³a sáº£n pháº©m thÃ nh cÃ´ng." });
+            return ServiceResult<object>.Ok(new { message = "Xóa sản phẩm thành công." });
         }
 
         public async Task<ServiceResult<object>> SearchProductsAsync(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
             {
-                return ServiceResult<object>.BadRequest("Tá»« khÃ³a tÃ¬m kiáº¿m khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng.");
+                return ServiceResult<object>.BadRequest("Từ khóa tìm kiếm không được để trống.");
             }
 
             keyword = keyword.Trim();
@@ -273,7 +273,7 @@ namespace MyAPI.Application.Services.Catalog
         {
             if (minPrice.HasValue && maxPrice.HasValue && minPrice > maxPrice)
             {
-                return ServiceResult<object>.BadRequest("GiÃ¡ tá»‘i thiá»ƒu khÃ´ng Ä‘Æ°á»£c lá»›n hÆ¡n giÃ¡ tá»‘i Ä‘a.");
+                return ServiceResult<object>.BadRequest("Giá tối thiểu không được lớn hơn giá tối đa.");
             }
 
             var query = BuildProductListQuery();

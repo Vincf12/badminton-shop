@@ -6,6 +6,7 @@ import {
 } from "@/shared/api/authSession";
 
 const AUTH_API_URL = `${API_BASE_URL}/Auth`;
+const ACCOUNT_API_URL = `${API_BASE_URL}/account`;
 
 export interface RegisterData {
   fullName: string;
@@ -151,15 +152,16 @@ class AuthService {
   }
 
   async getCurrentUser(token: string): Promise<User> {
-  const response = await fetch(`${AUTH_API_URL}/me`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    cache: "no-store",
-  });
-  if(!response.ok) {
-    throw new Error(await readErrorMessage(response, "Không thể lấy thông tin người dùng"));
-  }
+    const response = await fetch(`${ACCOUNT_API_URL}/me`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(await readErrorMessage(response, "Không thể lấy thông tin người dùng"));
+    }
 
     const user = mapUser(await response.json());
     return {

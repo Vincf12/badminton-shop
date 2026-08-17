@@ -586,6 +586,26 @@ namespace MyAPI.Infrastructure.Persistence
                     .HasForeignKey(e => e.ProductId)
                     .OnDelete(DeleteBehavior.Cascade);
             });
+
+            modelBuilder.Entity<Store>(entity =>
+            {
+                entity.ToTable("stores");
+                entity.HasKey(e => e.StoreId);
+
+                entity.Property(e => e.StoreId).HasColumnName("store_id");
+                entity.Property(e => e.StoreCode).HasColumnName("store_code").HasMaxLength(50);
+                entity.Property(e => e.StoreName).HasColumnName("store_name").HasMaxLength(200).IsRequired();
+                entity.Property(e => e.Phone).HasColumnName("phone").HasMaxLength(20).IsRequired();
+                entity.Property(e => e.Province).HasColumnName("province").HasMaxLength(100).IsRequired();
+                entity.Property(e => e.Ward).HasColumnName("ward").HasMaxLength(100).IsRequired();
+                entity.Property(e => e.AddressDetail).HasColumnName("address_detail").IsRequired();
+                entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
+                entity.Property(e => e.IsPickupPoint).HasColumnName("is_pickup_point").HasDefaultValue(false);
+                entity.Property(e => e.OpeningTime).HasColumnName("opening_time");
+                entity.Property(e => e.ClosingTime).HasColumnName("closing_time");
+                entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+                entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            });
         }
     }
 }

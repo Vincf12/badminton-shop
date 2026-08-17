@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Application.Services.Catalog
 {
@@ -11,7 +11,7 @@ namespace MyAPI.Application.Services.Catalog
             _context = context;
         }
 
-        public async Task<IEnumerable<ProductSpecDto>> GetSpecsAsync(int productId)
+        public async Task<IEnumerable<ProductSpecResponse>> GetSpecsAsync(int productId)
         {
             return await _context.ProductSpecs
                 .AsNoTracking()
@@ -25,7 +25,7 @@ namespace MyAPI.Application.Services.Catalog
             var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
             if (!productExists)
             {
-                return ServiceResult<object>.BadRequest("San pham khong ton tai.");
+                return ServiceResult<object>.BadRequest("Sản phẩm không tồn tại.");
             }
 
             var spec = new ProductSpec
@@ -40,7 +40,7 @@ namespace MyAPI.Application.Services.Catalog
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Them thong so san pham thanh cong.",
+                message = "Thêm thông số sản phẩm thành công.",
                 specId = spec.SpecId
             });
         }
@@ -50,14 +50,14 @@ namespace MyAPI.Application.Services.Catalog
             var spec = await _context.ProductSpecs.FirstOrDefaultAsync(s => s.SpecId == id);
             if (spec == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay thong so san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thông số sản phẩm.");
             }
 
             spec.SpecName = dto.SpecName.Trim();
             spec.SpecValue = dto.SpecValue.Trim();
 
             await _context.SaveChangesAsync();
-            return ServiceResult<object>.OK("Cap nhat thong so san pham thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật thông số sản phẩm thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteSpecAsync(int id)
@@ -65,18 +65,18 @@ namespace MyAPI.Application.Services.Catalog
             var spec = await _context.ProductSpecs.FirstOrDefaultAsync(s => s.SpecId == id);
             if (spec == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay thong so san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thông số sản phẩm.");
             }
 
             _context.ProductSpecs.Remove(spec);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa thong so san pham thanh cong.");
+            return ServiceResult<object>.OK("Xóa thông số sản phẩm thành công.");
         }
 
-        private static ProductSpecDto MapSpec(ProductSpec spec)
+        private static ProductSpecResponse MapSpec(ProductSpec spec)
         {
-            return new ProductSpecDto
+            return new ProductSpecResponse
             {
                 SpecId = spec.SpecId,
                 ProductId = spec.ProductId,

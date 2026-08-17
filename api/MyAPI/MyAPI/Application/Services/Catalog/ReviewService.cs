@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Application.Services.Catalog
 {
@@ -17,7 +17,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (!productExists)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<object>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             var reviews = await (
@@ -26,7 +26,7 @@ namespace MyAPI.Application.Services.Catalog
                     on review.UserId equals user.UserId
                 where review.ProductId == productId
                 orderby review.CreatedAt descending
-                select new ReviewDto
+                select new ReviewResponse
                 {
                     ReviewId = review.ReviewId,
                     UserId = review.UserId,
@@ -47,14 +47,14 @@ namespace MyAPI.Application.Services.Catalog
 
             if (!productExists)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<object>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             var exists = await _context.Reviews.AnyAsync(r => r.UserId == userId && r.ProductId == productId);
 
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("Báº¡n Ä‘Ã£ Ä‘Ã¡nh giÃ¡ sáº£n pháº©m nÃ y.");
+                return ServiceResult<object>.BadRequest("Bạn đã đánh giá sản phẩm này.");
             }
 
             var review = new Review
@@ -71,7 +71,7 @@ namespace MyAPI.Application.Services.Catalog
 
             var user = await _context.Users.AsNoTracking().FirstAsync(u => u.UserId == userId);
 
-            return ServiceResult<object>.Ok(new ReviewDto
+            return ServiceResult<object>.Ok(new ReviewResponse
             {
                 ReviewId = review.ReviewId,
                 UserId = review.UserId,
@@ -89,7 +89,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (review == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Ã¡nh giÃ¡.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đánh giá.");
             }
 
             if (review.UserId != userId)
@@ -102,7 +102,7 @@ namespace MyAPI.Application.Services.Catalog
 
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "Cáº­p nháº­t Ä‘Ã¡nh giÃ¡ thÃ nh cÃ´ng." });
+            return ServiceResult<object>.Ok(new { message = "Cập nhật đánh giá thành công." });
         }
 
         public async Task<ServiceResult<object>> DeleteReviewAsync(int id, int userId, bool isAdmin)
@@ -111,7 +111,7 @@ namespace MyAPI.Application.Services.Catalog
 
             if (review == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Ã¡nh giÃ¡.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đánh giá.");
             }
 
             if (!isAdmin && review.UserId != userId)
@@ -122,7 +122,7 @@ namespace MyAPI.Application.Services.Catalog
             _context.Reviews.Remove(review);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "XÃ³a Ä‘Ã¡nh giÃ¡ thÃ nh cÃ´ng." });
+            return ServiceResult<object>.Ok(new { message = "Xóa đánh giá thành công." });
         }
     }
 }

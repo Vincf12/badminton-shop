@@ -80,7 +80,7 @@ namespace MyAPI.Application.Services.Customer
 
             if (!productExists)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y sáº£n pháº©m.");
+                return ServiceResult<object>.NotFound("Không tìm thấy sản phẩm.");
             }
 
             var wishlist = await GetOrCreateWishlistAsync(userId);
@@ -88,7 +88,7 @@ namespace MyAPI.Application.Services.Customer
 
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("Sáº£n pháº©m Ä‘Ã£ cÃ³ trong danh sÃ¡ch yÃªu thÃ­ch.");
+                return ServiceResult<object>.BadRequest("Sản phẩm đã có trong danh sách yêu thích.");
             }
 
             _context.WishlistItems.Add(new WishlistItem
@@ -99,7 +99,7 @@ namespace MyAPI.Application.Services.Customer
 
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "ÄÃ£ thÃªm sáº£n pháº©m vÃ o danh sÃ¡ch yÃªu thÃ­ch." });
+            return ServiceResult<object>.Ok(new { message = "Đã thêm sản phẩm vào danh sách yêu thích." });
         }
 
         public async Task<ServiceResult<object>> DeleteWishlistItemAsync(int userId, int productId)
@@ -110,13 +110,13 @@ namespace MyAPI.Application.Services.Customer
 
             if (item == null)
             {
-                return ServiceResult<object>.NotFound("Sáº£n pháº©m khÃ´ng cÃ³ trong danh sÃ¡ch yÃªu thÃ­ch.");
+                return ServiceResult<object>.NotFound("Sản phẩm không có trong danh sách yêu thích.");
             }
 
             _context.WishlistItems.Remove(item);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "ÄÃ£ xÃ³a sáº£n pháº©m khá»i danh sÃ¡ch yÃªu thÃ­ch." });
+            return ServiceResult<object>.Ok(new { message = "Đã xóa sản phẩm khỏi danh sách yêu thích." });
         }
 
         public async Task<ServiceResult<object>> CheckWishlistItemAsync(int userId, int productId)

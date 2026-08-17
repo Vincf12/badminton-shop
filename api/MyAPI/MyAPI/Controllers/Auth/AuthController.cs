@@ -34,7 +34,7 @@ namespace MyAPI.Controllers.Auth
         [HttpPost("logout")]
         public IActionResult Logout()
         {
-            return Ok(new { message = "Dang xuat thanh cong. Hay xoa token o phia client." });
+            return Ok(new { message = "Đăng xuất thành công. Hãy xóa token ở phía client." });
         }
 
         private bool TryGetCurrentUserId(out int userId)

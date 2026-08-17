@@ -32,28 +32,28 @@ const stats = [
 
 const timeline = [
   {
-    year: "2018",
-    title: "Khởi đầu từ một sân tập nhỏ",
-    description:
-      "FlyShot ra đời tại TP. Hồ Chí Minh từ nhu cầu rất thật: người chơi phong trào khó tìm được vợt đúng lối chơi và nơi căng dây đáng tin cậy.",
+  year: "2018",
+  title: "Khởi đầu từ một sân tập nhỏ",
+  description:
+  "FlyShot được thành lập tại TP. Hồ Chí Minh, xuất phát từ nhu cầu thực tế của cộng đồng người chơi phong trào: khó tìm được cây vợt phù hợp với lối chơi và địa chỉ căng dây uy tín, chính xác.",
   },
   {
-    year: "2020",
-    title: "Mở phòng kỹ thuật riêng",
-    description:
-      "Đầu tư máy căng dây điện tử và quy trình kiểm tra khung vợt 42 bước, giảm sai số căng dây xuống dưới 0.5kg.",
+  year: "2020",
+  title: "Mở phòng kỹ thuật riêng",
+  description:
+  "FlyShot đầu tư hệ thống máy căng dây điện tử hiện đại, đồng thời xây dựng quy trình kiểm tra khung vợt 42 bước, giúp kiểm soát độ chính xác lực căng với sai số dưới 0.5kg.",
   },
   {
-    year: "2022",
-    title: "Hợp tác nhà phân phối chính hãng",
-    description:
-      "Trở thành điểm bán được ủy quyền của nhiều thương hiệu vợt lớn, đảm bảo nguồn hàng chính hãng và bảo hành đầy đủ.",
+  year: "2022",
+  title: "Hợp tác nhà phân phối chính hãng",
+  description:
+  "Trở thành đối tác phân phối ủy quyền của nhiều thương hiệu vợt hàng đầu, FlyShot cam kết cung cấp sản phẩm chính hãng, minh bạch nguồn gốc và chế độ bảo hành đầy đủ.",
   },
   {
-    year: "Hiện tại",
-    title: "Đồng hành cùng hơn 5.000 người chơi",
-    description:
-      "Từ người mới bắt đầu đến vận động viên phong trào thi đấu, mỗi tư vấn vẫn giữ nguyên một nguyên tắc: đúng người, đúng vợt.",
+  year: "Hiện tại",
+  title: "Đồng hành cùng hơn 5.000 người chơi",
+  description:
+  "FlyShot đã và đang đồng hành cùng hơn 5.000 người chơi ở nhiều cấp độ, từ người mới bắt đầu đến vận động viên phong trào thi đấu, với triết lý tư vấn cốt lõi: đúng người – đúng vợt.",
   },
 ];
 
@@ -97,13 +97,13 @@ const testimonials = [
   {
     quote:
       "Mình từng đổi 3 cây vợt vì không hợp tay. Sau khi được FlyShot tư vấn theo tốc độ vung, cây vợt hiện tại là cây mình gắn bó lâu nhất.",
-    name: "Minh Anh",
+    name: "Đăng Khoa",
     role: "Người chơi phong trào, 4 năm",
   },
   {
     quote:
       "Đội ngũ giải thích thông số rất dễ hiểu, không ép mua vợt đắt tiền. Căng dây đúng như yêu cầu, cảm giác cầu ổn định qua nhiều buổi tập.",
-    name: "Quốc Bảo",
+    name: "Giáng Mi",
     role: "Thành viên CLB cầu lông quận 7",
   },
 ];
@@ -134,10 +134,10 @@ const faqs = [
 export default function AboutPage() {
   return (
     <MainLayout>
-      <div className={`${body.className} mx-auto w-full max-w-6xl px-4 text-[#0B1220] sm:px-6`}>
+      <div className={`${body.className} mx-auto w-full max-w-7xl px-4 text-[#0B1220] sm:px-6`}>
         
         {/* 1. HERO SECTION */}
-        <section className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-16">
+        <section className="grid grid-cols-1 gap-12 lg:grid-cols-12 py-6 lg:py-8 lg:gap-16">
           <div className="lg:col-span-7">
             <p className="text-xl font-black tracking-[0.2em] text-emerald-600">
               Về FlyShot
@@ -187,7 +187,7 @@ export default function AboutPage() {
         {/* 3. STORY & TIMELINE */}
         <section className="py-16 lg:py-24">
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-4 lg:sticky lg:top-8 lg:h-fit">
+            <div className="lg:col-span-4 lg:top-8 lg:h-fit">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
                 Hành trình
               </p>
@@ -366,7 +366,7 @@ export default function AboutPage() {
                 <div>
                   <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Địa chỉ</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                    Số 12, Đường ABC, Quận 7, TP. Hồ Chí Minh
+                    Số 91B, Đường Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh
                   </p>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Application.Services.Order
 {
@@ -23,7 +23,7 @@ namespace MyAPI.Application.Services.Order
 
             if (!validPaymentMethods.Contains(paymentMethod))
             {
-                return ServiceResult<object>.BadRequest("PhÆ°Æ¡ng thá»©c thanh toÃ¡n khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Phương thức thanh toán không hợp lệ.");
             }
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
@@ -35,7 +35,7 @@ namespace MyAPI.Application.Services.Order
 
                 if (address == null)
                 {
-                    return ServiceResult<object>.BadRequest("Äá»‹a chá»‰ giao hÃ ng khÃ´ng há»£p lá»‡.");
+                    return ServiceResult<object>.BadRequest("Địa chỉ giao hàng không hợp lệ.");
                 }
 
                 var cart = await _context.Carts
@@ -43,7 +43,7 @@ namespace MyAPI.Application.Services.Order
 
                 if (cart == null)
                 {
-                    return ServiceResult<object>.BadRequest("Giá» hÃ ng trá»‘ng.");
+                    return ServiceResult<object>.BadRequest("Giỏ hàng trống.");
                 }
 
                 var cartItems = await _context.CartItems
@@ -52,7 +52,7 @@ namespace MyAPI.Application.Services.Order
 
                 if (!cartItems.Any())
                 {
-                    return ServiceResult<object>.BadRequest("Giá» hÃ ng trá»‘ng.");
+                    return ServiceResult<object>.BadRequest("Giỏ hàng trống.");
                 }
 
                 decimal totalAmount = 0;
@@ -63,7 +63,7 @@ namespace MyAPI.Application.Services.Order
                 {
                     if (item.Quantity <= 0)
                     {
-                        return ServiceResult<object>.BadRequest("Sá»‘ lÆ°á»£ng sáº£n pháº©m khÃ´ng há»£p lá»‡.");
+                        return ServiceResult<object>.BadRequest("Số lượng sản phẩm không hợp lệ.");
                     }
 
                     var variant = await _context.ProductVariants
@@ -71,12 +71,12 @@ namespace MyAPI.Application.Services.Order
 
                     if (variant == null)
                     {
-                        return ServiceResult<object>.BadRequest("Biáº¿n thá»ƒ sáº£n pháº©m khÃ´ng tá»“n táº¡i.");
+                        return ServiceResult<object>.BadRequest("Biến thể sản phẩm không tồn tại.");
                     }
 
                     if (variant.StockQuantity < item.Quantity)
                     {
-                        return ServiceResult<object>.BadRequest($"Sáº£n pháº©m {variant.Sku} khÃ´ng Ä‘á»§ tá»“n kho.");
+                        return ServiceResult<object>.BadRequest($"Sản phẩm {variant.Sku} không đủ tồn kho.");
                     }
 
                     decimal subTotal = variant.Price * item.Quantity;
@@ -102,7 +102,7 @@ namespace MyAPI.Application.Services.Order
 
                     if (!couponResult.Succeeded)
                     {
-                        return ServiceResult<object>.BadRequest(couponResult.Message ?? "MÃ£ giáº£m giÃ¡ khÃ´ng há»£p lá»‡.");
+                        return ServiceResult<object>.BadRequest(couponResult.Message ?? "Mã giảm giá không hợp lệ.");
                     }
 
                     discountAmount = couponResult.DiscountAmount;
@@ -111,7 +111,7 @@ namespace MyAPI.Application.Services.Order
 
                 decimal finalAmount = totalAmount + shippingFee - discountAmount;
 
-                var order = new Order
+                var order = new MyAPI.Domain.Entities.Order.Order
                 {
                     UserId = userId,
                     CouponId = couponId,
@@ -152,7 +152,7 @@ namespace MyAPI.Application.Services.Order
                 {
                     OrderId = order.OrderId,
                     Status = "pending",
-                    Note = "ÄÆ¡n hÃ ng Ä‘Æ°á»£c táº¡o.",
+                    Note = "Đơn hàng được tạo.",
                     CreatedAt = DateTime.UtcNow
                 });
 
@@ -163,7 +163,7 @@ namespace MyAPI.Application.Services.Order
 
                 return ServiceResult<object>.Ok(new
                 {
-                    message = "Táº¡o Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng.",
+                    message = "Tạo đơn hàng thành công.",
                     orderId = order.OrderId,
                     orderCode = order.OrderCode,
                     totalAmount,
@@ -232,7 +232,7 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
             }
 
             if (!isAdminOrStaff && order.UserId != currentUserId)
@@ -290,14 +290,14 @@ namespace MyAPI.Application.Services.Order
 
             if (!validStatuses.Contains(dto.Status))
             {
-                return ServiceResult<object>.BadRequest("Tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Trạng thái đơn hàng không hợp lệ.");
             }
 
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
             }
 
             order.Status = dto.Status;
@@ -313,7 +313,7 @@ namespace MyAPI.Application.Services.Order
 
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.Ok(new { message = "Cáº­p nháº­t tráº¡ng thÃ¡i Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng." });
+            return ServiceResult<object>.Ok(new { message = "Cập nhật trạng thái đơn hàng thành công." });
         }
 
         public async Task<ServiceResult<object>> CancelOrderAsync(int orderId, int currentUserId, bool isAdminOrStaff)
@@ -326,7 +326,7 @@ namespace MyAPI.Application.Services.Order
 
                 if (order == null)
                 {
-                    return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                    return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
                 }
 
                 if (!isAdminOrStaff && order.UserId != currentUserId)
@@ -336,12 +336,12 @@ namespace MyAPI.Application.Services.Order
 
                 if (order.Status == "completed")
                 {
-                    return ServiceResult<object>.BadRequest("KhÃ´ng thá»ƒ há»§y Ä‘Æ¡n hÃ ng Ä‘Ã£ hoÃ n thÃ nh.");
+                    return ServiceResult<object>.BadRequest("Không thể hủy đơn hàng đã hoàn thành.");
                 }
 
                 if (order.Status == "cancelled")
                 {
-                    return ServiceResult<object>.BadRequest("ÄÆ¡n hÃ ng Ä‘Ã£ Ä‘Æ°á»£c há»§y trÆ°á»›c Ä‘Ã³.");
+                    return ServiceResult<object>.BadRequest("Đơn hàng đã được hủy trước đó.");
                 }
 
                 var details = await _context.OrderDetails
@@ -366,14 +366,14 @@ namespace MyAPI.Application.Services.Order
                 {
                     OrderId = order.OrderId,
                     Status = "cancelled",
-                    Note = "ÄÆ¡n hÃ ng Ä‘Ã£ Ä‘Æ°á»£c há»§y.",
+                    Note = "Đơn hàng đã được hủy.",
                     CreatedAt = DateTime.UtcNow
                 });
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return ServiceResult<object>.Ok(new { message = "Há»§y Ä‘Æ¡n hÃ ng thÃ nh cÃ´ng." });
+                return ServiceResult<object>.Ok(new { message = "Hủy đơn hàng thành công." });
             }
             catch
             {
@@ -389,29 +389,29 @@ namespace MyAPI.Application.Services.Order
 
             if (coupon == null)
             {
-                return CouponApplyResult.Fail("MÃ£ giáº£m giÃ¡ khÃ´ng tá»“n táº¡i.");
+                return CouponApplyResult.Fail("Mã giảm giá không tồn tại.");
             }
 
             if (!coupon.IsActive)
             {
-                return CouponApplyResult.Fail("MÃ£ giáº£m giÃ¡ Ä‘Ã£ bá»‹ khÃ³a.");
+                return CouponApplyResult.Fail("Mã giảm giá đã bị khóa.");
             }
 
             var now = DateTime.UtcNow;
 
             if (now < coupon.StartDate || now > coupon.EndDate)
             {
-                return CouponApplyResult.Fail("MÃ£ giáº£m giÃ¡ khÃ´ng cÃ²n hiá»‡u lá»±c.");
+                return CouponApplyResult.Fail("Mã giảm giá không còn hiệu lực.");
             }
 
             if (coupon.UsageLimit.HasValue && coupon.UsedCount >= coupon.UsageLimit.Value)
             {
-                return CouponApplyResult.Fail("MÃ£ giáº£m giÃ¡ Ä‘Ã£ háº¿t lÆ°á»£t sá»­ dá»¥ng.");
+                return CouponApplyResult.Fail("Mã giảm giá đã hết lượt sử dụng.");
             }
 
             if (totalAmount < coupon.MinimumOrderAmount)
             {
-                return CouponApplyResult.Fail($"ÄÆ¡n hÃ ng pháº£i tá»« {coupon.MinimumOrderAmount:N0} VNÄ Ä‘á»ƒ dÃ¹ng mÃ£ nÃ y.");
+                return CouponApplyResult.Fail($"Đơn hàng phải từ {coupon.MinimumOrderAmount:N0} VND để dùng mã này.");
             }
 
             decimal discountAmount;
@@ -431,7 +431,7 @@ namespace MyAPI.Application.Services.Order
             }
             else
             {
-                return CouponApplyResult.Fail("Loáº¡i mÃ£ giáº£m giÃ¡ khÃ´ng há»£p lá»‡.");
+                return CouponApplyResult.Fail("Loại mã giảm giá không hợp lệ.");
             }
 
             if (discountAmount > totalAmount)

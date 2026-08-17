@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Application.Services.Catalog
 {
@@ -11,7 +11,7 @@ namespace MyAPI.Application.Services.Catalog
             _context = context;
         }
 
-        public async Task<IEnumerable<ProductVariantDto>> GetVariantsByProductAsync(int productId)
+        public async Task<IEnumerable<ProductVariantResponse>> GetVariantsByProductAsync(int productId)
         {
             return await _context.ProductVariants
                 .AsNoTracking()
@@ -20,7 +20,7 @@ namespace MyAPI.Application.Services.Catalog
                 .ToListAsync();
         }
 
-        public async Task<ServiceResult<ProductVariantDto>> GetVariantAsync(int id)
+        public async Task<ServiceResult<ProductVariantResponse>> GetVariantAsync(int id)
         {
             var variant = await _context.ProductVariants
                 .AsNoTracking()
@@ -29,8 +29,8 @@ namespace MyAPI.Application.Services.Catalog
                 .FirstOrDefaultAsync();
 
             return variant == null
-                ? ServiceResult<ProductVariantDto>.NotFound("Khong tim thay bien the san pham.")
-                : ServiceResult<ProductVariantDto>.Ok(variant);
+                ? ServiceResult<ProductVariantResponse>.NotFound("Không tìm thấy biến thể sản phẩm.")
+                : ServiceResult<ProductVariantResponse>.Ok(variant);
         }
 
         public async Task<ServiceResult<object>> CreateVariantAsync(int productId, ProductVariantUpsertDto dto)
@@ -38,14 +38,14 @@ namespace MyAPI.Application.Services.Catalog
             var productExists = await _context.Products.AnyAsync(p => p.ProductId == productId);
             if (!productExists)
             {
-                return ServiceResult<object>.BadRequest("San pham khong ton tai.");
+                return ServiceResult<object>.BadRequest("Sản phẩm không tồn tại.");
             }
 
             var sku = dto.Sku.Trim();
             var skuExists = await _context.ProductVariants.AnyAsync(v => v.Sku == sku);
             if (skuExists)
             {
-                return ServiceResult<object>.BadRequest("SKU da ton tai.");
+                return ServiceResult<object>.BadRequest("SKU đã tồn tại.");
             }
 
             var variant = new ProductVariant
@@ -65,7 +65,7 @@ namespace MyAPI.Application.Services.Catalog
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Them bien the thanh cong.",
+                message = "Thêm biến thể thành công.",
                 variantId = variant.VariantId
             });
         }
@@ -75,14 +75,14 @@ namespace MyAPI.Application.Services.Catalog
             var variant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.VariantId == id);
             if (variant == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay bien the san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy biến thể sản phẩm.");
             }
 
             var sku = dto.Sku.Trim();
             var skuExists = await _context.ProductVariants.AnyAsync(v => v.VariantId != id && v.Sku == sku);
             if (skuExists)
             {
-                return ServiceResult<object>.BadRequest("SKU da ton tai.");
+                return ServiceResult<object>.BadRequest("SKU đã tồn tại.");
             }
 
             variant.Sku = sku;
@@ -94,7 +94,7 @@ namespace MyAPI.Application.Services.Catalog
             variant.ImageUrl = NormalizeOptional(dto.ImageUrl);
 
             await _context.SaveChangesAsync();
-            return ServiceResult<object>.OK("Cap nhat bien the thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật biến thể thành công.");
         }
 
         public async Task<ServiceResult<object>> UpdateStockAsync(int id, UpdateStockDto dto)
@@ -102,13 +102,13 @@ namespace MyAPI.Application.Services.Catalog
             var variant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.VariantId == id);
             if (variant == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay bien the san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy biến thể sản phẩm.");
             }
 
             variant.StockQuantity = dto.StockQuantity;
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Cap nhat ton kho thanh cong.");
+            return ServiceResult<object>.OK("Cập nhật tồn kho thành công.");
         }
 
         public async Task<ServiceResult<object>> DeleteVariantAsync(int id)
@@ -116,13 +116,13 @@ namespace MyAPI.Application.Services.Catalog
             var variant = await _context.ProductVariants.FirstOrDefaultAsync(v => v.VariantId == id);
             if (variant == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay bien the san pham.");
+                return ServiceResult<object>.NotFound("Không tìm thấy biến thể sản phẩm.");
             }
 
             _context.ProductVariants.Remove(variant);
             await _context.SaveChangesAsync();
 
-            return ServiceResult<object>.OK("Xoa bien the thanh cong.");
+            return ServiceResult<object>.OK("Xóa biến thể thành công.");
         }
 
         private static string? NormalizeOptional(string? value)
@@ -130,9 +130,9 @@ namespace MyAPI.Application.Services.Catalog
             return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
         }
 
-        private static ProductVariantDto MapVariant(ProductVariant variant)
+        private static ProductVariantResponse MapVariant(ProductVariant variant)
         {
-            return new ProductVariantDto
+            return new ProductVariantResponse
             {
                 VariantId = variant.VariantId,
                 ProductId = variant.ProductId,

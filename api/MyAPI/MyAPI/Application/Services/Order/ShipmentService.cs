@@ -42,7 +42,7 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
             }
 
             if (!isAdminOrStaff && order.UserId != currentUserId)
@@ -54,7 +54,7 @@ namespace MyAPI.Application.Services.Order
 
             if (shipment == null)
             {
-                return ServiceResult<object>.NotFound("ÄÆ¡n hÃ ng chÆ°a cÃ³ thÃ´ng tin váº­n chuyá»ƒn.");
+                return ServiceResult<object>.NotFound("Đơn hàng chưa có thông tin vận chuyển.");
             }
 
             return ServiceResult<object>.Ok(MapShipment(shipment));
@@ -64,21 +64,21 @@ namespace MyAPI.Application.Services.Order
         {
             if (!IsValidStatus(dto.Status))
             {
-                return ServiceResult<object>.BadRequest("Tráº¡ng thÃ¡i váº­n chuyá»ƒn khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Trạng thái vận chuyển không hợp lệ.");
             }
 
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == dto.OrderId);
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
             }
 
             var exists = await _context.Shipments.AnyAsync(s => s.OrderId == dto.OrderId);
 
             if (exists)
             {
-                return ServiceResult<object>.BadRequest("ÄÆ¡n hÃ ng Ä‘Ã£ cÃ³ thÃ´ng tin váº­n chuyá»ƒn.");
+                return ServiceResult<object>.BadRequest("Đơn hàng đã có thông tin vận chuyển.");
             }
 
             var shipment = new Shipment
@@ -105,14 +105,14 @@ namespace MyAPI.Application.Services.Order
         {
             if (!IsValidStatus(dto.Status))
             {
-                return ServiceResult<object>.BadRequest("Tráº¡ng thÃ¡i váº­n chuyá»ƒn khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Trạng thái vận chuyển không hợp lệ.");
             }
 
             var shipment = await _context.Shipments.FirstOrDefaultAsync(s => s.ShipmentId == id);
 
             if (shipment == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin váº­n chuyá»ƒn.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thông tin vận chuyển.");
             }
 
             shipment.TrackingNumber = string.IsNullOrWhiteSpace(dto.TrackingNumber) ? null : dto.TrackingNumber.Trim();
@@ -134,7 +134,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Cáº­p nháº­t váº­n chuyá»ƒn thÃ nh cÃ´ng.",
+                message = "Cập nhật vận chuyển thành công.",
                 shipment = MapShipment(shipment)
             });
         }
@@ -143,14 +143,14 @@ namespace MyAPI.Application.Services.Order
         {
             if (!IsValidStatus(dto.Status))
             {
-                return ServiceResult<object>.BadRequest("Tráº¡ng thÃ¡i váº­n chuyá»ƒn khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Trạng thái vận chuyển không hợp lệ.");
             }
 
             var shipment = await _context.Shipments.FirstOrDefaultAsync(s => s.ShipmentId == id);
 
             if (shipment == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y thÃ´ng tin váº­n chuyá»ƒn.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thông tin vận chuyển.");
             }
 
             shipment.Status = dto.Status;
@@ -177,7 +177,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Cáº­p nháº­t tráº¡ng thÃ¡i giao hÃ ng thÃ nh cÃ´ng.",
+                message = "Cập nhật trạng thái giao hàng thành công.",
                 shipment = MapShipment(shipment)
             });
         }

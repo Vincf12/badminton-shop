@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MyAPI.Application.Services.Order
 {
@@ -26,7 +26,7 @@ namespace MyAPI.Application.Services.Order
             };
         }
 
-        private async Task<Order?> GetAccessibleOrderAsync(int orderId, int currentUserId, bool isAdminOrStaff)
+        private async Task<MyAPI.Domain.Entities.Order.Order?> GetAccessibleOrderAsync(int orderId, int currentUserId, bool isAdminOrStaff)
         {
             var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
@@ -43,7 +43,7 @@ namespace MyAPI.Application.Services.Order
             return order;
         }
 
-        private async Task<Payment> GetOrCreatePaymentAsync(Order order, string method)
+        private async Task<Payment> GetOrCreatePaymentAsync(MyAPI.Domain.Entities.Order.Order order, string method)
         {
             var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == order.OrderId);
 
@@ -73,14 +73,14 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng hoáº·c báº¡n khÃ´ng cÃ³ quyá»n xem.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng hoặc bạn không có quyền xem.");
             }
 
             var payment = await _context.Payments.AsNoTracking().FirstOrDefaultAsync(p => p.OrderId == orderId);
 
             if (payment == null)
             {
-                return ServiceResult<object>.NotFound("ÄÆ¡n hÃ ng chÆ°a cÃ³ thÃ´ng tin thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Đơn hàng chưa có thông tin thanh toán.");
             }
 
             return ServiceResult<object>.Ok(MapPayment(payment));
@@ -92,12 +92,12 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("Khong tim thay don hang hoac ban khong co quyen thanh toan.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng hoặc bạn không có quyền thanh toán.");
             }
 
             if (order.Status == "cancelled")
             {
-                return ServiceResult<object>.BadRequest("Khong the tao thanh toan COD cho don hang da huy.");
+                return ServiceResult<object>.BadRequest("Không thể tạo thanh toán COD cho đơn hàng đã hủy.");
             }
 
             var payment = await GetOrCreatePaymentAsync(order, "cod");
@@ -110,7 +110,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Tao thanh toan COD thanh cong. Khach hang se thanh toan khi nhan hang.",
+                message = "ạo thanh toán COD thành công. Khách hàng sẽ thanh toán khi nhận hàng.",
                 payment = MapPayment(payment)
             });
         }
@@ -121,7 +121,7 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng hoáº·c báº¡n khÃ´ng cÃ³ quyá»n thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng hoặc bạn không có quyền thanh toán.");
             }
 
             var payment = await GetOrCreatePaymentAsync(order, "vnpay");
@@ -134,7 +134,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Táº¡o URL thanh toÃ¡n VNPAY thÃ nh cÃ´ng.",
+                message = "Tạo URL thanh toán VNPAY thành công.",
                 paymentId = payment.PaymentId,
                 orderId = order.OrderId,
                 amount = payment.Amount,
@@ -146,14 +146,14 @@ namespace MyAPI.Application.Services.Order
         {
             if (!int.TryParse(txnRef, out int orderId))
             {
-                return ServiceResult<object>.BadRequest("MÃ£ Ä‘Æ¡n hÃ ng callback khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Mã đơn hàng callback không hợp lệ.");
             }
 
             var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == orderId);
 
             if (payment == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thanh toán.");
             }
 
             payment.PaymentMethod = "vnpay";
@@ -165,7 +165,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = responseCode == "00" ? "Thanh toÃ¡n VNPAY thÃ nh cÃ´ng." : "Thanh toÃ¡n VNPAY tháº¥t báº¡i.",
+                message = responseCode == "00" ? "Thanh toán VNPAY thành công." : "Thanh toán VNPAY thất bại.",
                 payment = MapPayment(payment)
             });
         }
@@ -176,7 +176,7 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng hoáº·c báº¡n khÃ´ng cÃ³ quyá»n thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng hoặc bạn không có quyền thanh toán.");
             }
 
             var payment = await GetOrCreatePaymentAsync(order, "momo");
@@ -187,7 +187,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Táº¡o thanh toÃ¡n Momo thÃ nh cÃ´ng.",
+                message = "Tạo thanh toán Momo thành công.",
                 paymentId = payment.PaymentId,
                 orderId = order.OrderId,
                 amount = payment.Amount,
@@ -198,7 +198,7 @@ namespace MyAPI.Application.Services.Order
 
         public async Task<ServiceResult<object>> MomoCallbackAsync(MomoCallbackDto dto)
         {
-            Order? order = null;
+            MyAPI.Domain.Entities.Order.Order? order = null;
 
             if (dto.OrderId.HasValue)
             {
@@ -211,14 +211,14 @@ namespace MyAPI.Application.Services.Order
 
             if (order == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y Ä‘Æ¡n hÃ ng.");
+                return ServiceResult<object>.NotFound("Không tìm thấy đơn hàng.");
             }
 
             var payment = await _context.Payments.FirstOrDefaultAsync(p => p.OrderId == order.OrderId);
 
             if (payment == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thanh toán.");
             }
 
             var success = dto.ResultCode == "0" || string.Equals(dto.ResultCode, "success", StringComparison.OrdinalIgnoreCase);
@@ -232,7 +232,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = success ? "Thanh toÃ¡n Momo thÃ nh cÃ´ng." : "Thanh toÃ¡n Momo tháº¥t báº¡i.",
+                message = success ? "Thanh toán Momo thành công." : "Thanh toán Momo thất bại.",
                 payment = MapPayment(payment)
             });
         }
@@ -243,14 +243,14 @@ namespace MyAPI.Application.Services.Order
 
             if (!validStatuses.Contains(dto.Status))
             {
-                return ServiceResult<object>.BadRequest("Tráº¡ng thÃ¡i thanh toÃ¡n khÃ´ng há»£p lá»‡.");
+                return ServiceResult<object>.BadRequest("Trạng thái thanh toán không hợp lệ.");
             }
 
             var payment = await _context.Payments.FirstOrDefaultAsync(p => p.PaymentId == id);
 
             if (payment == null)
             {
-                return ServiceResult<object>.NotFound("KhÃ´ng tÃ¬m tháº¥y thanh toÃ¡n.");
+                return ServiceResult<object>.NotFound("Không tìm thấy thanh toán.");
             }
 
             payment.PaymentStatus = dto.Status;
@@ -261,7 +261,7 @@ namespace MyAPI.Application.Services.Order
 
             return ServiceResult<object>.Ok(new
             {
-                message = "Cáº­p nháº­t tráº¡ng thÃ¡i thanh toÃ¡n thÃ nh cÃ´ng.",
+                message = "Cập nhật trạng thái thanh toán thành công.",
                 payment = MapPayment(payment)
             });
         }

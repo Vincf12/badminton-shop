@@ -21,7 +21,7 @@ namespace MyAPI.Controllers.Auth
         {
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _accountService.GetCurrentUserAsync(userId);
@@ -33,7 +33,7 @@ namespace MyAPI.Controllers.Auth
         {
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _accountService.UpdateProfileAsync(userId, dto);
@@ -50,7 +50,7 @@ namespace MyAPI.Controllers.Auth
 
             if (!TryGetCurrentUserId(out var userId))
             {
-                return Unauthorized(new { message = "KhÃ´ng thá»ƒ xÃ¡c Ä‘á»‹nh ngÆ°á»i dÃ¹ng hiá»‡n táº¡i." });
+                return Unauthorized(new { message = "Không thể xác định người dùng hiện tại." });
             }
 
             var result = await _accountService.ChangePasswordAsync(userId, dto);
